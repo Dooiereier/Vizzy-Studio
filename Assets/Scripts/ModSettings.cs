@@ -98,6 +98,8 @@ namespace Assets.Scripts
 
         public BoolSetting ArrangeMfd { get; private set; }
 
+        public BoolSetting EditorCulling { get; private set; }
+
         public BoolSetting FunkAutoFill { get; private set; }
 
         public BoolSetting FunkSyntaxHighlight { get; private set; }
@@ -167,6 +169,10 @@ namespace Assets.Scripts
 
             this.ArrangeMfd = this.CreateBool("{VizzyStudio.Settings.ArrangeMfd}", "ArrangeMfd")
                 .SetDescription("{VizzyStudio.Settings.ArrangeMfd.Description}")
+                .SetDefault(false);
+
+            this.EditorCulling = this.CreateBool("{VizzyStudio.Settings.EditorCulling}", "EditorCulling")
+                .SetDescription("{VizzyStudio.Settings.EditorCulling.Description}")
                 .SetDefault(false);
 
             this.FunkSyntaxHighlight = this.CreateBool("{VizzyStudio.Settings.FunkSyntaxHighlight}", "FunkSyntaxHighlight")

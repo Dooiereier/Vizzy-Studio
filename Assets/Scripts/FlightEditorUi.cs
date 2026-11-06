@@ -81,6 +81,14 @@ namespace Assets.Scripts
                 EditorLog.Warning("Couldn't add the block search: " + e);
             }
 
+            request.AddOnLayoutRebuiltAction(controller =>
+            {
+                if (controller is VizzyUIController vizzy && vizzy.GetComponent<EditorCulling>() == null)
+                {
+                    vizzy.gameObject.AddComponent<EditorCulling>().Connect(vizzy);
+                }
+            });
+
             if (BuildingOurEditor)
             {
                 ReplaceApplyAndCancel(request);
