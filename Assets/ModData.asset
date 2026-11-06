@@ -16,10 +16,9 @@ MonoBehaviour:
   - Vizzy Studio.dll
   _author: Dooiereier, Oxeter and Torifune
   _description: A general upgrade of the Vizzy user experience. Edit a running craft's
-    Vizzy program in flight in the stock editor (Option/Alt+A or the flight menu),
-    Block Search, Funk auto-fill and coloring, Jump To tagged blocks, Export Block,
-    Clean Variables and Arrange MFD. Code by Dooiereier, Oxeter and Torifune. UI
-    textures by QiQi. Needs Juno Harmony.
+    Vizzy program in flight in the stock editor, Block Search, Funk auto-fill and
+    coloring, Jump To tagged blocks, Export Block, Clean Unused Variables and Arrange
+    MFD. Code by Dooiereier and Torifune. Requires Juno Harmony.
   _loadPriority: 10
   _name: Vizzy Studio
   _otherAssets:
