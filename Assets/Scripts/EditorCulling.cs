@@ -3,6 +3,7 @@ namespace Assets.Scripts
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.CompilerServices;
     using Assets.Scripts.Vizzy.UI;
     using Assets.Scripts.Vizzy.UI.Elements;
     using HarmonyLib;
@@ -26,12 +27,19 @@ namespace Assets.Scripts
 
         private static readonly List<EditorCulling> Instances = new List<EditorCulling>();
 
+        /// <summary>Why culling can't run at all, such as a patch it needs that didn't apply; null when it can.</summary>
+        public static string Unavailable { get; set; }
+
         private readonly List<BlockElementScript> _blocks = new List<BlockElementScript>();
         private readonly Dictionary<Transform, Rect> _stacks = new Dictionary<Transform, Rect>();
         private readonly HashSet<Transform> _off = new HashSet<Transform>();
         private readonly Vector3[] _corners = new Vector3[4];
 
         private VizzyUIController _controller;
+
+        // Why culling stays off in this editor (Unavailable, or another mod that patches the Vizzy editor).
+        private string _blocked;
+        private bool _blockedLogged;
 
         // The stock view has no mask, so Unity draws and batches every block. A RectMask2D on the view is
         // Unity's own way to leave out graphics outside it; it's only added while culling is on.
@@ -45,6 +53,75 @@ namespace Assets.Scripts
         public void Connect(VizzyUIController controller)
         {
             _controller = controller;
+            _blocked = Unavailable;
+            if (_blocked == null)
+            {
+                try
+                {
+                    var others = OtherVizzyEditorPatches();
+                    if (others.Count > 0)
+                    {
+                        _blocked = "other mods patch the Vizzy editor (" + string.Join(", ", others) + ")";
+                    }
+                }
+                catch (Exception e)
+                {
+                    _blocked = "couldn't check other mods' patches: " + e.Message;
+                }
+            }
+        }
+
+        /// <summary>
+        /// The Harmony ids of other mods that patch the stock Vizzy editor. Their code may look only at active
+        /// blocks, and it can't be checked, so culling stays off with them.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static List<string> OtherVizzyEditorPatches()
+        {
+            var owners = new SortedSet<string>(StringComparer.Ordinal);
+            foreach (var method in Harmony.GetAllPatchedMethods())
+            {
+                var type = method.DeclaringType;
+                while (type != null && type.DeclaringType != null)
+                {
+                    type = type.DeclaringType;
+                }
+
+                if (type == null || type.Namespace == null || !type.Namespace.StartsWith("Assets.Scripts.Vizzy", StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                var info = Harmony.GetPatchInfo(method);
+                if (info == null)
+                {
+                    continue;
+                }
+
+                foreach (var owner in info.Owners)
+                {
+                    if (owner != Mod.HarmonyId)
+                    {
+                        owners.Add(owner);
+                    }
+                }
+            }
+
+            return owners.ToList();
+        }
+
+        /// <summary>Whether culling may switch blocks off in this editor of the given stock editor.</summary>
+        public static bool ActiveFor(object vizzyUI)
+        {
+            foreach (var culling in Instances)
+            {
+                if (culling != null && culling._blocked == null && culling._controller != null && ReferenceEquals(culling._controller.VizzyUI, vizzyUI))
+                {
+                    return ModSettings.Instance.EditorCulling.Value;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>Everything back on in this editor, for stock code that only looks at active blocks.</summary>
@@ -78,6 +155,17 @@ namespace Assets.Scripts
             {
                 this.LogFrameTime();
                 var culling = ModSettings.Instance.EditorCulling.Value;
+                if (culling && _blocked != null)
+                {
+                    if (!_blockedLogged)
+                    {
+                        _blockedLogged = true;
+                        EditorLog.Warning("Editor Culling is off for this editor: " + _blocked + ".");
+                    }
+
+                    culling = false;
+                }
+
                 this.SetMask(culling);
                 if (!culling)
                 {
@@ -271,7 +359,9 @@ namespace Assets.Scripts
 
     /// <summary>
     /// Stock methods that collect the canvas's blocks with GetComponentsInChildren() see only active ones:
-    /// renaming or deleting a variable would miss the switched-off stacks. Everything goes back on first.
+    /// renaming or deleting a variable would miss the switched-off stacks, and loading a program (also Undo,
+    /// Redo, Import and New) would leave them behind. Everything goes back on first. The full list of such
+    /// stock methods, with why the others are harmless, is tools/editor_lookups.txt.
     /// </summary>
     [HarmonyPatch]
     public static class EditorCullingRestorePatch
@@ -280,6 +370,7 @@ namespace Assets.Scripts
         {
             yield return AccessTools.Method(typeof(VizzyUIScript), "GetVariableElements");
             yield return AccessTools.Method(typeof(VizzyUIScript), "CanDeleteSelection");
+            yield return AccessTools.Method(typeof(VizzyUIScript), "LoadFlightProgram", new[] { typeof(System.Xml.Linq.XElement), typeof(bool), typeof(bool), typeof(Vector2) });
         }
 
         private static void Prefix(VizzyUIScript __instance)
@@ -291,6 +382,63 @@ namespace Assets.Scripts
             catch (Exception e)
             {
                 EditorLog.Error("Couldn't switch the editor's blocks back on: " + e);
+            }
+        }
+    }
+
+    /// <summary>
+    /// A safety net behind <see cref="EditorCullingRestorePatch"/>: after a stock rename or delete of a global
+    /// variable, any block that still uses the old name, switched off or not, gets what the stock method does to
+    /// the blocks it found (renamed, or removed). Normally there's none; one is logged. Only while culling is on.
+    /// </summary>
+    [HarmonyPatch]
+    public static class EditorCullingVariablePatch
+    {
+        private static IEnumerable<System.Reflection.MethodBase> TargetMethods()
+        {
+            yield return AccessTools.Method(typeof(VizzyUIScript), "RenameVariable", new[] { typeof(string), typeof(string) });
+            yield return AccessTools.Method(typeof(VizzyUIScript), "DeleteVariable", new[] { typeof(string) });
+        }
+
+        private static void Postfix(VizzyUIScript __instance, object[] __args, System.Reflection.MethodBase __originalMethod)
+        {
+            try
+            {
+                if (!EditorCulling.ActiveFor(__instance) || __instance.ProgramTransform == null)
+                {
+                    return;
+                }
+
+                var oldName = (string)__args[0];
+                var rename = __originalMethod.Name == "RenameVariable";
+                var missed = 0;
+                foreach (var block in __instance.ProgramTransform.GetComponentsInChildren<BlockElementScript>(true))
+                {
+                    if (block == null || !(block.Node is ModApi.Craft.Program.VariableExpression variable) || variable.IsLocal || variable.VariableName != oldName)
+                    {
+                        continue;
+                    }
+
+                    missed++;
+                    if (rename)
+                    {
+                        variable.VariableName = (string)__args[1];
+                        block.OnChildSizeChanged();
+                    }
+                    else
+                    {
+                        block.Destroy();
+                    }
+                }
+
+                if (missed > 0)
+                {
+                    EditorLog.Warning("Editor Culling: the stock " + __originalMethod.Name + " missed " + missed + " blocks using '" + oldName + "'; they were " + (rename ? "renamed" : "removed") + " too.");
+                }
+            }
+            catch (Exception e)
+            {
+                EditorLog.Error("Couldn't check the blocks after a variable change: " + e);
             }
         }
     }

@@ -190,7 +190,7 @@
    <s id="VizzyStudio.Settings.Modifier.Description">Held with the editor key.</s>
    <s id="VizzyStudio.Settings.ShowFlightButtons.Description">Shows a Vizzy button on the flight nav panel, with Restart Vizzy and Edit Vizzy. Applies from the next flight.</s>
    <s id="VizzyStudio.Settings.ArrangeMfd.Description">Adds Arrange MFD to the flight buttons: move, resize and rotate the widgets of a custom MFD program, then save the values into the program. Saving also changes the craft's files, after backing them up. Applies from the next flight.</s>
-   <s id="VizzyStudio.Settings.EditorCulling.Description">Pauses the per-frame work of Vizzy blocks far outside the view, which makes large programs lighter to edit. Blocks look the same and switch back on as they come near.</s>
+   <s id="VizzyStudio.Settings.EditorCulling.Description">Pauses the per-frame work of Vizzy blocks far outside the view, which makes large programs lighter to edit. Blocks look the same and switch back on as they come near. It stays off when another mod changes the Vizzy editor.</s>
    <s id="VizzyStudio.Settings.FunkSyntaxHighlight.Description">Colors Funk fields and marks errors in red, in the designer and in flight.</s>
    <s id="VizzyStudio.Settings.FunkAutoFill.Description">Suggests Funk names while typing in a Funk field, in the designer and in flight. Up and Down choose, Enter takes it, Esc closes the list.</s>
    <s id="VizzyStudio.Settings.Modifier.Alt">Option / Alt</s>

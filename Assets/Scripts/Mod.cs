@@ -10,6 +10,9 @@ namespace Assets.Scripts
 
     public class Mod : ModApi.Mods.GameMod
     {
+        /// <summary>The mod's Harmony id, which marks its own patches.</summary>
+        public const string HarmonyId = "VizzyStudio";
+
         private static bool _checked;
         private static bool _started;
         private static string _startupProblem;
@@ -73,10 +76,10 @@ namespace Assets.Scripts
 
             Guarded("add the console command", () => Assets.Packages.DevConsole.DevConsoleApi.RegisterCommand("CleanUnusedVariables", VizzyVariableCleaner.CleanOpenEditor));
 
-            var harmony = new HarmonyLib.Harmony("VizzyStudio");
+            var harmony = new HarmonyLib.Harmony(HarmonyId);
             var applied = 0;
             var failed = 0;
-            var patches = new List<Type> { typeof(FunkInputPatch), typeof(FunkHighlightRegisterPatch), typeof(EditorCullingRestorePatch) };
+            var patches = new List<Type> { typeof(FunkInputPatch), typeof(FunkHighlightRegisterPatch), typeof(EditorCullingRestorePatch), typeof(EditorCullingVariablePatch) };
             foreach (var patch in patches)
             {
                 try
@@ -93,6 +96,11 @@ namespace Assets.Scripts
                 {
                     failed++;
                     Debug.LogWarning("[VizzyStudio] Patch " + patch.Name + " failed: " + e);
+                    if (patch == typeof(EditorCullingRestorePatch) || patch == typeof(EditorCullingVariablePatch))
+                    {
+                        // Without them culling could hide blocks from a rename, delete or Undo.
+                        EditorCulling.Unavailable = "its patch " + patch.Name + " didn't apply";
+                    }
                 }
             }
 
