@@ -5,6 +5,7 @@ namespace Assets.Scripts
     using Assets.Scripts.Vizzy.UI;
     using Assets.Scripts.Vizzy.UI.Elements;
     using UnityEngine;
+    using UnityEngine.UI;
 
     /// <summary>
     /// Every block and text field on the Vizzy canvas runs its own Update, every frame, even far off screen,
@@ -24,6 +25,10 @@ namespace Assets.Scripts
         private readonly Vector3[] _corners = new Vector3[4];
 
         private VizzyUIController _controller;
+
+        // The stock canvas has no mask, so Unity draws and batches all blocks, on screen or not. A RectMask2D on
+        // the view is Unity's own way to leave out graphics outside it; it's only added while culling is on.
+        private RectMask2D _mask;
         private float _nextCheck;
         private float _nextRefresh;
         private float _nextLog;
@@ -46,6 +51,7 @@ namespace Assets.Scripts
             {
                 this.LogFrameTime();
                 var culling = ModSettings.Instance.EditorCulling.Value;
+                this.SetMask(culling);
                 if (!culling)
                 {
                     this.RestoreAll();
@@ -150,6 +156,20 @@ namespace Assets.Scripts
             _frameTime = 0f;
         }
 
+        private void SetMask(bool on)
+        {
+            if (on && _mask == null && _controller != null && _controller.ProgramContainer != null)
+            {
+                var view = _controller.ProgramContainer.gameObject;
+                _mask = view.GetComponent<RectMask2D>() == null ? view.AddComponent<RectMask2D>() : null;
+            }
+            else if (!on && _mask != null)
+            {
+                Destroy(_mask);
+                _mask = null;
+            }
+        }
+
         private void RestoreAll()
         {
             foreach (var block in _off)
@@ -166,11 +186,13 @@ namespace Assets.Scripts
         private void OnDisable()
         {
             this.RestoreAll();
+            this.SetMask(false);
         }
 
         private void OnDestroy()
         {
             this.RestoreAll();
+            this.SetMask(false);
         }
     }
 }
