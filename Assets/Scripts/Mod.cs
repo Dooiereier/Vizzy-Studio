@@ -79,7 +79,7 @@ namespace Assets.Scripts
             var harmony = new HarmonyLib.Harmony(HarmonyId);
             var applied = 0;
             var failed = 0;
-            var patches = new List<Type> { typeof(FunkInputPatch), typeof(FunkHighlightRegisterPatch), typeof(EditorCullingRestorePatch), typeof(EditorCullingVariablePatch) };
+            var patches = new List<Type> { typeof(FunkInputPatch), typeof(FunkHighlightRegisterPatch), typeof(EditorCullingLookupPatch), typeof(EditorCullingVariablePatch) };
             foreach (var patch in patches)
             {
                 try
@@ -96,7 +96,7 @@ namespace Assets.Scripts
                 {
                     failed++;
                     Debug.LogWarning("[VizzyStudio] Patch " + patch.Name + " failed: " + e);
-                    if (patch == typeof(EditorCullingRestorePatch) || patch == typeof(EditorCullingVariablePatch))
+                    if (patch == typeof(EditorCullingLookupPatch) || patch == typeof(EditorCullingVariablePatch))
                     {
                         // Without them culling could hide blocks from a rename, delete or Undo.
                         EditorCulling.Unavailable = "its patch " + patch.Name + " didn't apply";

@@ -1,6 +1,6 @@
 # Stock Vizzy editor methods whose lookups skip inactive objects (GetComponent(s)InChildren without
 # includeInactive: true, FindObject(s)OfType), as tools/check_editor_lookups.py finds them, and why
-# each is safe with Editor Culling. "patched": EditorCullingRestorePatch switches every stack on first.
+# each is safe with Editor Culling. "patched": EditorCullingLookupPatch makes its lookups see switched-off stacks.
 # Reviewed against Juno 1.4.105 and 1.4.201 (IL, 2026-11-06).
 VizzyUIScript.GetVariableElements patched: whole program; behind RenameVariable and DeleteVariable (and Clean Variables).
 VizzyUIScript.CanDeleteSelection patched: whole program.

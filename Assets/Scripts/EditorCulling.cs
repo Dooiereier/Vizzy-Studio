@@ -3,6 +3,8 @@ namespace Assets.Scripts
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
+    using System.Reflection.Emit;
     using System.Runtime.CompilerServices;
     using Assets.Scripts.Vizzy.UI;
     using Assets.Scripts.Vizzy.UI.Elements;
@@ -33,6 +35,9 @@ namespace Assets.Scripts
         private readonly List<BlockElementScript> _blocks = new List<BlockElementScript>();
         private readonly Dictionary<Transform, Rect> _stacks = new Dictionary<Transform, Rect>();
         private readonly HashSet<Transform> _off = new HashSet<Transform>();
+
+        // Every editor's switched-off stacks, for IsCulled.
+        private static readonly HashSet<Transform> Off = new HashSet<Transform>();
         private readonly Vector3[] _corners = new Vector3[4];
 
         private VizzyUIController _controller;
@@ -124,19 +129,26 @@ namespace Assets.Scripts
             return false;
         }
 
-        /// <summary>Everything back on in this editor, for stock code that only looks at active blocks.</summary>
-        public static void RestoreFor(object vizzyUI)
+        /// <summary>
+        /// Whether the object is inside a stack culling switched off. Stock lookups patched by
+        /// <see cref="EditorCullingLookupPatch"/> see these as if they were on, and still skip anything else inactive.
+        /// </summary>
+        public static bool IsCulled(Transform transform)
         {
-            foreach (var culling in Instances)
+            if (Off.Count == 0)
             {
-                if (culling != null && culling._controller != null && ReferenceEquals(culling._controller.VizzyUI, vizzyUI))
-                {
-                    culling.RestoreAll();
+                return false;
+            }
 
-                    // Long enough for the stock action to finish before anything switches off again.
-                    culling._nextCheck = Time.unscaledTime + 1f;
+            for (var t = transform; t != null; t = t.parent)
+            {
+                if (Off.Contains(t))
+                {
+                    return true;
                 }
             }
+
+            return false;
         }
 
         private static bool MouseHeld()
@@ -225,6 +237,7 @@ namespace Assets.Scripts
                     {
                         if (_off.Remove(stack))
                         {
+                            Off.Remove(stack);
                             stack.gameObject.SetActive(true);
                         }
                     }
@@ -232,6 +245,7 @@ namespace Assets.Scripts
                     {
                         stack.gameObject.SetActive(false);
                         _off.Add(stack);
+                        Off.Add(stack);
                     }
                 }
             }
@@ -288,6 +302,7 @@ namespace Assets.Scripts
             }
 
             _off.RemoveWhere(stack => stack == null);
+            Off.RemoveWhere(stack => stack == null);
         }
 
         /// <summary>With Debug Logging, the average frame time and how many stacks are switched off, every few seconds.</summary>
@@ -333,6 +348,7 @@ namespace Assets.Scripts
         {
             foreach (var stack in _off)
             {
+                Off.Remove(stack);
                 if (stack != null)
                 {
                     stack.gameObject.SetActive(true);
@@ -359,48 +375,96 @@ namespace Assets.Scripts
 
     /// <summary>
     /// Stock methods that collect the canvas's blocks with GetComponentsInChildren() see only active ones:
-    /// renaming or deleting a variable would miss the switched-off stacks, and loading a program (also Undo,
-    /// Redo, Import and New) would leave them behind. Everything goes back on first. The full list of such
+    /// renaming or deleting a variable would miss the switched-off stacks, deleting a custom instruction would
+    /// miss its calls there, and loading a program (also Undo, Redo, Import and New) would leave them behind.
+    /// Each such call is replaced by one that also sees blocks in switched-off stacks, so nothing has to be
+    /// switched on (which would build every block not yet built, a freeze of seconds). Other inactive objects
+    /// are still skipped, as stock, so with culling off the result is the stock one. The full list of such
     /// stock methods, with why the others are harmless, is tools/editor_lookups.txt.
     /// </summary>
     [HarmonyPatch]
-    public static class EditorCullingRestorePatch
+    public static class EditorCullingLookupPatch
     {
-        private static IEnumerable<System.Reflection.MethodBase> TargetMethods()
+        private static IEnumerable<MethodBase> TargetMethods()
         {
             yield return AccessTools.Method(typeof(VizzyUIScript), "GetVariableElements");
             yield return AccessTools.Method(typeof(VizzyUIScript), "CanDeleteSelection");
             yield return AccessTools.Method(typeof(VizzyUIScript), "LoadFlightProgram", new[] { typeof(System.Xml.Linq.XElement), typeof(bool), typeof(bool), typeof(Vector2) });
         }
 
-        private static void Prefix(VizzyUIScript __instance)
+        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, MethodBase original)
         {
-            try
+            var onComponent = AccessTools.Method(typeof(EditorCullingLookupPatch), nameof(InChildren));
+            var onGameObject = AccessTools.Method(typeof(EditorCullingLookupPatch), nameof(InChildrenOfGameObject));
+            var replaced = 0;
+            var result = new List<CodeInstruction>();
+            foreach (var instruction in instructions)
             {
-                EditorCulling.RestoreFor(__instance);
+                if ((instruction.opcode == OpCodes.Call || instruction.opcode == OpCodes.Callvirt)
+                    && instruction.operand is MethodInfo method && method.Name == "GetComponentsInChildren"
+                    && method.IsGenericMethod && method.GetParameters().Length == 0
+                    && (method.DeclaringType == typeof(Component) || method.DeclaringType == typeof(GameObject)))
+                {
+                    var helper = method.DeclaringType == typeof(GameObject) ? onGameObject : onComponent;
+                    instruction.opcode = OpCodes.Call;
+                    instruction.operand = helper.MakeGenericMethod(method.GetGenericArguments());
+                    replaced++;
+                }
+
+                result.Add(instruction);
             }
-            catch (Exception e)
+
+            // The game changed: without these culling could hide blocks from it, so the patch fails and culling stays off.
+            if (replaced == 0)
             {
-                EditorLog.Error("Couldn't switch the editor's blocks back on: " + e);
+                throw new InvalidOperationException(original.Name + " no longer calls GetComponentsInChildren<T>()");
             }
+
+            return result;
+        }
+
+        /// <summary>component.GetComponentsInChildren&lt;T&gt;(), but blocks in switched-off stacks count as active.</summary>
+        public static T[] InChildren<T>(Component component)
+        {
+            return Visible(component.GetComponentsInChildren<T>(true));
+        }
+
+        public static T[] InChildrenOfGameObject<T>(GameObject gameObject)
+        {
+            return Visible(gameObject.GetComponentsInChildren<T>(true));
+        }
+
+        private static T[] Visible<T>(T[] found)
+        {
+            var kept = new List<T>(found.Length);
+            foreach (var item in found)
+            {
+                var component = item as Component;
+                if (component == null || component.gameObject.activeInHierarchy || EditorCulling.IsCulled(component.transform))
+                {
+                    kept.Add(item);
+                }
+            }
+
+            return kept.Count == found.Length ? found : kept.ToArray();
         }
     }
 
     /// <summary>
-    /// A safety net behind <see cref="EditorCullingRestorePatch"/>: after a stock rename or delete of a global
+    /// A safety net behind <see cref="EditorCullingLookupPatch"/>: after a stock rename or delete of a global
     /// variable, any block that still uses the old name, switched off or not, gets what the stock method does to
     /// the blocks it found (renamed, or removed). Normally there's none; one is logged. Only while culling is on.
     /// </summary>
     [HarmonyPatch]
     public static class EditorCullingVariablePatch
     {
-        private static IEnumerable<System.Reflection.MethodBase> TargetMethods()
+        private static IEnumerable<MethodBase> TargetMethods()
         {
             yield return AccessTools.Method(typeof(VizzyUIScript), "RenameVariable", new[] { typeof(string), typeof(string) });
             yield return AccessTools.Method(typeof(VizzyUIScript), "DeleteVariable", new[] { typeof(string) });
         }
 
-        private static void Postfix(VizzyUIScript __instance, object[] __args, System.Reflection.MethodBase __originalMethod)
+        private static void Postfix(VizzyUIScript __instance, object[] __args, MethodBase __originalMethod)
         {
             try
             {
