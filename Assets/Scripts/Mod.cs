@@ -81,7 +81,7 @@ namespace Assets.Scripts
             var harmony = new HarmonyLib.Harmony("VizzyStudio");
             var applied = 0;
             var failed = 0;
-            var patches = new List<Type> { typeof(FunkInputPatch), typeof(FunkHighlightRegisterPatch) };
+            var patches = new List<Type> { typeof(FunkInputPatch), typeof(FunkHighlightRegisterPatch), typeof(EditorCullingRestorePatch) };
             try
             {
                 // Before the toolbox patch: a block in the toolbox has to be able to save.

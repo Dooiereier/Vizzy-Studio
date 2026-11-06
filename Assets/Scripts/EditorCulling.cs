@@ -2,17 +2,21 @@ namespace Assets.Scripts
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Assets.Scripts.Vizzy.UI;
     using Assets.Scripts.Vizzy.UI.Elements;
+    using HarmonyLib;
     using UnityEngine;
+    using UnityEngine.EventSystems;
     using UnityEngine.UI;
 
     /// <summary>
-    /// Every block and text field on the Vizzy canvas runs its own Update, every frame, even far off screen,
-    /// so a large program costs time each frame whatever is visible. This switches the block scripts off for
-    /// blocks well outside the view and back on when they come near it. Their Update only handles a waiting
-    /// layout change and a text field's editing switch, which can wait until the block is near the view again.
-    /// The program itself is saved from the editor's node tree, so it isn't affected.
+    /// The stock Vizzy editor keeps every block of a program as live UI: each block and text field runs an
+    /// Update every frame and Unity lays out and draws them all, on screen or not, so large programs get slow
+    /// to edit. This switches whole stacks off (their GameObjects inactive) while they're well outside the
+    /// view, and on again as they come near, and masks the view so Unity leaves out what's outside it.
+    /// The program is saved from the editor's node tree, so it isn't affected. A few stock methods look only
+    /// at active blocks; <see cref="EditorCullingRestorePatch"/> switches everything on before them.
     /// </summary>
     public sealed class EditorCulling : MonoBehaviour
     {
@@ -20,14 +24,17 @@ namespace Assets.Scripts
         private const float RefreshInterval = 2f;
         private const float LogInterval = 5f;
 
+        private static readonly List<EditorCulling> Instances = new List<EditorCulling>();
+
         private readonly List<BlockElementScript> _blocks = new List<BlockElementScript>();
-        private readonly HashSet<BlockElementScript> _off = new HashSet<BlockElementScript>();
+        private readonly Dictionary<Transform, Rect> _stacks = new Dictionary<Transform, Rect>();
+        private readonly HashSet<Transform> _off = new HashSet<Transform>();
         private readonly Vector3[] _corners = new Vector3[4];
 
         private VizzyUIController _controller;
 
-        // The stock canvas has no mask, so Unity draws and batches all blocks, on screen or not. A RectMask2D on
-        // the view is Unity's own way to leave out graphics outside it; it's only added while culling is on.
+        // The stock view has no mask, so Unity draws and batches every block. A RectMask2D on the view is
+        // Unity's own way to leave out graphics outside it; it's only added while culling is on.
         private RectMask2D _mask;
         private float _nextCheck;
         private float _nextRefresh;
@@ -40,9 +47,29 @@ namespace Assets.Scripts
             _controller = controller;
         }
 
+        /// <summary>Everything back on in this editor, for stock code that only looks at active blocks.</summary>
+        public static void RestoreFor(object vizzyUI)
+        {
+            foreach (var culling in Instances)
+            {
+                if (culling != null && culling._controller != null && ReferenceEquals(culling._controller.VizzyUI, vizzyUI))
+                {
+                    culling.RestoreAll();
+
+                    // Long enough for the stock action to finish before anything switches off again.
+                    culling._nextCheck = Time.unscaledTime + 1f;
+                }
+            }
+        }
+
         private static bool MouseHeld()
         {
             return UnityEngine.Input.GetMouseButton(0) || UnityEngine.Input.GetMouseButton(1) || UnityEngine.Input.GetMouseButton(2);
+        }
+
+        private void OnEnable()
+        {
+            Instances.Add(this);
         }
 
         private void Update()
@@ -76,14 +103,11 @@ namespace Assets.Scripts
                     return;
                 }
 
-                // Blocks come and go with editing and undo; a new one starts switched on, which is safe.
-                // Counted with culling off too, for the debug line's comparison.
+                // Stacks come and go with editing and undo; a new one starts switched on, which is safe.
                 if (now >= _nextRefresh)
                 {
                     _nextRefresh = now + RefreshInterval;
-                    _blocks.Clear();
-                    program.GetComponentsInChildren(true, _blocks);
-                    _off.RemoveWhere(block => block == null);
+                    this.Measure(program);
                 }
 
                 if (!culling)
@@ -91,39 +115,35 @@ namespace Assets.Scripts
                     return;
                 }
 
-                // The view and one view's width and height around it, so nothing switches on in sight.
+                // The view and one view's width and height around it, in the program's own space, where a
+                // stack's place only changes when it's edited, not when the view pans or zooms.
                 view.GetWorldCorners(_corners);
-                var width = _corners[2].x - _corners[0].x;
-                var height = _corners[2].y - _corners[0].y;
-                var left = _corners[0].x - width;
-                var right = _corners[2].x + width;
-                var bottom = _corners[0].y - height;
-                var top = _corners[2].y + height;
+                var a = program.InverseTransformPoint(_corners[0]);
+                var b = program.InverseTransformPoint(_corners[2]);
+                var width = Mathf.Abs(b.x - a.x);
+                var height = Mathf.Abs(b.y - a.y);
+                var near = Rect.MinMaxRect(Mathf.Min(a.x, b.x) - width, Mathf.Min(a.y, b.y) - height, Mathf.Max(a.x, b.x) + width, Mathf.Max(a.y, b.y) + height);
+                var busy = Busy();
 
-                foreach (var block in _blocks)
+                foreach (var pair in _stacks)
                 {
-                    if (block == null)
+                    var stack = pair.Key;
+                    if (stack == null)
                     {
                         continue;
                     }
 
-                    var rect = block.RectTransform;
-                    var scale = rect.lossyScale.x;
-                    var size = block.Size * scale;
-                    var x = rect.position.x - (rect.pivot.x * size.x);
-                    var y = rect.position.y + ((1f - rect.pivot.y) * size.y);
-                    var near = x <= right && x + size.x >= left && y >= bottom && y - size.y <= top;
-                    if (near)
+                    if (pair.Value.Overlaps(near) || (busy != null && busy.IsChildOf(stack)))
                     {
-                        if (_off.Remove(block))
+                        if (_off.Remove(stack))
                         {
-                            block.enabled = true;
+                            stack.gameObject.SetActive(true);
                         }
                     }
-                    else if (block.enabled && !block.IsDragging)
+                    else if (stack.gameObject.activeSelf)
                     {
-                        block.enabled = false;
-                        _off.Add(block);
+                        stack.gameObject.SetActive(false);
+                        _off.Add(stack);
                     }
                 }
             }
@@ -131,11 +151,58 @@ namespace Assets.Scripts
             {
                 EditorLog.Error("Editor culling failed, so it's off for this editor: " + e);
                 this.RestoreAll();
+                this.SetMask(false);
                 this.enabled = false;
             }
         }
 
-        /// <summary>With Debug Logging, the average frame time and how many blocks are switched off, every few seconds.</summary>
+        /// <summary>The selected object, such as a text field being typed in: its stack always stays on.</summary>
+        private static Transform Busy()
+        {
+            var selected = EventSystem.current == null ? null : EventSystem.current.currentSelectedGameObject;
+            return selected == null ? null : selected.transform;
+        }
+
+        /// <summary>Each stack's box in the program's space: every block in it, switched off or not.</summary>
+        private void Measure(Transform program)
+        {
+            _blocks.Clear();
+            program.GetComponentsInChildren(true, _blocks);
+            _stacks.Clear();
+            var scale = program.lossyScale.x;
+            foreach (var block in _blocks)
+            {
+                if (block == null)
+                {
+                    continue;
+                }
+
+                var stack = block.transform;
+                while (stack.parent != null && stack.parent != program)
+                {
+                    stack = stack.parent;
+                }
+
+                if (stack.parent != program)
+                {
+                    continue;
+                }
+
+                var rect = block.RectTransform;
+                var size = block.Size * (rect.lossyScale.x / scale);
+                var corner = program.InverseTransformPoint(rect.position);
+                var left = corner.x - (rect.pivot.x * size.x);
+                var top = corner.y + ((1f - rect.pivot.y) * size.y);
+                var box = Rect.MinMaxRect(left, top - size.y, left + size.x, top);
+                _stacks[stack] = _stacks.TryGetValue(stack, out var known)
+                    ? Rect.MinMaxRect(Mathf.Min(known.xMin, box.xMin), Mathf.Min(known.yMin, box.yMin), Mathf.Max(known.xMax, box.xMax), Mathf.Max(known.yMax, box.yMax))
+                    : box;
+            }
+
+            _off.RemoveWhere(stack => stack == null);
+        }
+
+        /// <summary>With Debug Logging, the average frame time and how many stacks are switched off, every few seconds.</summary>
         private void LogFrameTime()
         {
             _frames++;
@@ -148,7 +215,8 @@ namespace Assets.Scripts
 
             if (_frames > 0 && _nextLog > 0f && ModSettings.Instance.DebugLogging.Value)
             {
-                EditorLog.Debug("Editor: " + (1000f * _frameTime / _frames).ToString("0.0") + " ms per frame, " + _off.Count + " of " + _blocks.Count + " blocks switched off, culling " + (ModSettings.Instance.EditorCulling.Value ? "on" : "off") + ".");
+                var offBlocks = _blocks.Count(block => block != null && !block.gameObject.activeInHierarchy);
+                EditorLog.Debug("Editor: " + (1000f * _frameTime / _frames).ToString("0.0") + " ms per frame, " + _off.Count + " of " + _stacks.Count + " stacks (" + offBlocks + " of " + _blocks.Count + " blocks) switched off, culling " + (ModSettings.Instance.EditorCulling.Value ? "on" : "off") + ".");
             }
 
             _nextLog = now + LogInterval;
@@ -161,7 +229,10 @@ namespace Assets.Scripts
             if (on && _mask == null && _controller != null && _controller.ProgramContainer != null)
             {
                 var view = _controller.ProgramContainer.gameObject;
-                _mask = view.GetComponent<RectMask2D>() == null ? view.AddComponent<RectMask2D>() : null;
+                if (view.GetComponent<RectMask2D>() == null)
+                {
+                    _mask = view.AddComponent<RectMask2D>();
+                }
             }
             else if (!on && _mask != null)
             {
@@ -172,11 +243,11 @@ namespace Assets.Scripts
 
         private void RestoreAll()
         {
-            foreach (var block in _off)
+            foreach (var stack in _off)
             {
-                if (block != null)
+                if (stack != null)
                 {
-                    block.enabled = true;
+                    stack.gameObject.SetActive(true);
                 }
             }
 
@@ -185,14 +256,42 @@ namespace Assets.Scripts
 
         private void OnDisable()
         {
+            Instances.Remove(this);
             this.RestoreAll();
             this.SetMask(false);
         }
 
         private void OnDestroy()
         {
+            Instances.Remove(this);
             this.RestoreAll();
             this.SetMask(false);
+        }
+    }
+
+    /// <summary>
+    /// Stock methods that collect the canvas's blocks with GetComponentsInChildren() see only active ones:
+    /// renaming or deleting a variable would miss the switched-off stacks. Everything goes back on first.
+    /// </summary>
+    [HarmonyPatch]
+    public static class EditorCullingRestorePatch
+    {
+        private static IEnumerable<System.Reflection.MethodBase> TargetMethods()
+        {
+            yield return AccessTools.Method(typeof(VizzyUIScript), "GetVariableElements");
+            yield return AccessTools.Method(typeof(VizzyUIScript), "CanDeleteSelection");
+        }
+
+        private static void Prefix(VizzyUIScript __instance)
+        {
+            try
+            {
+                EditorCulling.RestoreFor(__instance);
+            }
+            catch (Exception e)
+            {
+                EditorLog.Error("Couldn't switch the editor's blocks back on: " + e);
+            }
         }
     }
 }
