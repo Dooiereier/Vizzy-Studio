@@ -53,6 +53,10 @@ In the game's mod settings: the update check, debug logging, the editor key and 
 
 The update check reads the latest version from the mod's page once per game start and offers to open the page. Nothing is downloaded automatically.
 
+## Large programs
+
+The game's Vizzy editor gives every block and text field its own per-frame update, even far off screen, so large programs get slow to edit. **Editor Culling** (experimental, off by default) pauses that work for blocks well outside the view and switches it back on as they come near. With Debug Logging on, `Player.log` shows the average frame time and how many blocks are paused every few seconds, so you can compare it on and off.
+
 ## Languages
 
 English, Portuguese and Simplified Chinese, following the game's language setting. The translations are in `Assets/Content/Languages`; corrections from native speakers are welcome.
