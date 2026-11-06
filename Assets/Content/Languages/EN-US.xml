@@ -75,15 +75,6 @@
    <!-- JumpTo -->
    <s id="VizzyStudio.JumpTo.Tooltip">Jump To: moves the view to tagged blocks. Tag them with a comment starting with //, such as //Launch, or //Launch/Pitch Program to nest it.</s>
    <s id="VizzyStudio.JumpTo.Title">JUMP TO</s>
-   <!-- Matrix -->
-   <s id="VizzyStudio.Matrix.Multiply.Format">Matrix Multiply A=(0), B=(1)</s>
-   <s id="VizzyStudio.Matrix.Multiply.Tooltip">3x3 matrix multiplication. Both inputs are 9-element row-major lists [m00..m22].\nVizzy Studio mod required</s>
-   <s id="VizzyStudio.Matrix.GetElement.Format">Get Matrix Element M=(0), Row=(1:Number), Col=(2:Number)</s>
-   <s id="VizzyStudio.Matrix.GetElement.Tooltip">Returns element M[row][col]. Row and col are 0-based.\nVizzy Studio mod required</s>
-   <s id="VizzyStudio.Matrix.SetElement.Format">Set Matrix Element M=(0), Row=(1:Number), Col=(2:Number), Value=(3:Number)</s>
-   <s id="VizzyStudio.Matrix.SetElement.Tooltip">Returns a copy of M with element [row][col] replaced by Value.\nVizzy Studio mod required</s>
-   <s id="VizzyStudio.Matrix.Normalize.Format">Normalize Matrix M=(0), Mode=(1:Number)</s>
-   <s id="VizzyStudio.Matrix.Normalize.Tooltip">Mode 0: normalize columns, 1: normalize rows, 2: Frobenius scale to length 1.\nVizzy Studio mod required</s>
    <!-- Mfd -->
    <s id="VizzyStudio.Mfd.RestartQuestion">Restart {0}'s MFD program from the top? Its widgets are removed and its threads and variables reset. Other programs keep running.</s>
    <!-- MfdSave -->

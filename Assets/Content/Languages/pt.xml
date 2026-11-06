@@ -75,15 +75,6 @@
    <!-- JumpTo -->
    <s id="VizzyStudio.JumpTo.Tooltip">Saltar Para: move a vista para blocos marcados. Marca-os com um comentário que comece por //, como //Lançamento, ou //Lançamento/Programa de Inclinação para o aninhar.</s>
    <s id="VizzyStudio.JumpTo.Title">SALTAR PARA</s>
-   <!-- Matrix -->
-   <s id="VizzyStudio.Matrix.Multiply.Format">Multiplicar Matrizes A=(0), B=(1)</s>
-   <s id="VizzyStudio.Matrix.Multiply.Tooltip">Multiplicação de matrizes 3x3. Ambas as entradas são listas de 9 elementos por linhas [m00..m22].\nRequer o mod Vizzy Studio</s>
-   <s id="VizzyStudio.Matrix.GetElement.Format">Obter Elemento da Matriz M=(0), Linha=(1:Number), Coluna=(2:Number)</s>
-   <s id="VizzyStudio.Matrix.GetElement.Tooltip">Devolve o elemento M[linha][coluna]. Linha e coluna começam em 0.\nRequer o mod Vizzy Studio</s>
-   <s id="VizzyStudio.Matrix.SetElement.Format">Definir Elemento da Matriz M=(0), Linha=(1:Number), Coluna=(2:Number), Valor=(3:Number)</s>
-   <s id="VizzyStudio.Matrix.SetElement.Tooltip">Devolve uma cópia de M com o elemento [linha][coluna] substituído por Valor.\nRequer o mod Vizzy Studio</s>
-   <s id="VizzyStudio.Matrix.Normalize.Format">Normalizar Matriz M=(0), Modo=(1:Number)</s>
-   <s id="VizzyStudio.Matrix.Normalize.Tooltip">Modo 0: normalizar colunas, 1: normalizar linhas, 2: escala de Frobenius para comprimento 1.\nRequer o mod Vizzy Studio</s>
    <!-- Mfd -->
    <s id="VizzyStudio.Mfd.RestartQuestion">Reiniciar o programa de MFD de {0} desde o início? Os widgets são removidos e as threads e variáveis são repostas. Os outros programas continuam a correr.</s>
    <!-- MfdSave -->

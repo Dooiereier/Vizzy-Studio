@@ -10,11 +10,11 @@ carries on from where it was, so you can repeat quickload, edit, fly to tune thi
   Restart Vizzy button, for the selected part's program, after a confirmation.
 - **A quickload keeps the latest applied edit.** Craft state and thread positions come from the
   quicksave; the program is the latest edit. A key returns to the quicksave's program.
-- **Only crafts with a Matrix block need the mod.** No part modifiers; other programs stay ordinary stock XML.
+- **Crafts never need the mod.** No part modifiers; programs stay ordinary stock XML.
 - **Harmony is required**, from the Juno Harmony mod, and never inside the mod file. Without it the mod logs
-  an error, shows one message and stays off. Patches: auto-fill keys, coloring on each Funk field, and the
-  Matrix blocks in the toolbox; each has no public alternative, and each applies on its own.
-- **In the designer**, only auto-fill, coloring, the Matrix blocks, Clean Variables, Export Block, Jump To and
+  an error, shows one message and stays off. Patches: auto-fill keys and coloring on each Funk field; each
+  has no public alternative, and each applies on its own.
+- **In the designer**, only auto-fill, coloring, Clean Variables, Export Block, Jump To and
   reopening at the last view differ from stock.
 - **Other mods stay unaffected.** Only an editor this mod opens gets its Apply and Cancel replaced,
   so another mod that opens the stock editor in flight keeps the stock buttons.
@@ -71,7 +71,7 @@ Known limits:
 - `CraftPrograms`: which programs a craft has. `ProgramSwapper`: puts a program in place.
 - `ThreadRemapper`, `LatestEdits`, `FunkCompletion`: no game code, tested offline.
 - `FunkAutoFill`, `FunkList`, `FunkInputPatch`: auto-fill's game side.
-- `FunkHighlight`, `FlightButtons`, `MatrixBlocks`, `VizzyVariableCleaner`: from Vizzy Debugger.
+- `FunkHighlight`, `FlightButtons`, `VizzyVariableCleaner`: from Vizzy Debugger.
 - `Exporter/`, `VizzyOrganizer/`: from Vizzy Exporter and Vizzy McBlinky.
 
 ## Lifecycle
@@ -124,8 +124,6 @@ Code by Oxeter and Torifune, UI textures by QiQi, merged with their agreement.
   opening a flyout styled like the nav sphere's, with Restart Vizzy and Edit Vizzy. Both act on the selected
   part's program straight away, otherwise on the craft's only program or a choice of them. Restart asks first.
   For an MFD it removes the widgets too (`MfdRestart`), as they'd stay and each creation block would log an error. Show Flight Buttons turns them off.
-- **Matrix blocks** (`MatrixBlocks`): registered in the serializer's private tables, and added to the bottom
-  of the toolbox's Operators category by a patch, which is what needs Harmony. `IsModRequiredForCraft` is true only for a craft that uses one.
 - **MFD programs:** custom ones are editable. Stock ones are excluded, because the game reloads them.
 
 Known risk to test: widgets belong to `MfdScript` and survive an Apply, so widgets from deleted blocks can
@@ -181,4 +179,4 @@ Both by Dooiereier. Replace the separate mods, and the mod warns if they're also
 
 ## Languages
 
-Players' text lives in `Assets/Content/Languages/EN-US.xml` (the baseline), `pt.xml` and `zh-Hans.xml`, the languages the game itself ships. The files are Other Assets in `ModData`, so they're packed; at startup `ModManagerScript.LoadModLanguages` installs each `.xml` under a `languages/` path as that language's `Strings_Vizzy Studio.xml`. Code reads them through `Text.Get` (the game's `Locale.GetString`, so the game's language applies and a missing key falls back to English), with `{0}` placeholders and `.One`/`.Many` keys for counts. Settings use `{Key}` names, resolved by the settings screen, and keep their explicit XML names. Matrix block formats and tooltips are keys too: the game's `NodeStyle` reads both through its Locale. Log lines stay English. The offline tests read the English file and check that every key the code names exists, and that each language has every key, no empty text and the same placeholders.
+Players' text lives in `Assets/Content/Languages/EN-US.xml` (the baseline), `pt.xml` and `zh-Hans.xml`, the languages the game itself ships. The files are Other Assets in `ModData`, so they're packed; at startup `ModManagerScript.LoadModLanguages` installs each `.xml` under a `languages/` path as that language's `Strings_Vizzy Studio.xml`. Code reads them through `Text.Get` (the game's `Locale.GetString`, so the game's language applies and a missing key falls back to English), with `{0}` placeholders and `.One`/`.Many` keys for counts. Settings use `{Key}` names, resolved by the settings screen, and keep their explicit XML names. Log lines stay English. The offline tests read the English file and check that every key the code names exists, and that each language has every key, no empty text and the same placeholders.

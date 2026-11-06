@@ -11,8 +11,8 @@ facts in its `reference/juno-facts.md`.
 
 - Apply never restarts a program; only the Restart Vizzy button does, after asking. A quickload keeps the
   latest applied edit.
-- Only crafts with a Matrix block need the mod. No part modifiers.
-- Apart from auto-fill, coloring, the Matrix blocks, Clean Variables, Export Block, Jump To and reopening at the last view, the designer's editor stays stock, and an editor another
+- Crafts never need the mod: programs stay ordinary stock XML. No part modifiers.
+- Apart from auto-fill, coloring, Clean Variables, Export Block, Jump To and reopening at the last view, the designer's editor stays stock, and an editor another
   mod opens keeps its stock buttons.
 - Harmony comes from the Juno Harmony mod and is never inside the built mod file: check after each build.
 - No code copied from other mods without permission.

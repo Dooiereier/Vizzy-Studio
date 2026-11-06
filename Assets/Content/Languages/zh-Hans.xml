@@ -75,15 +75,6 @@
    <!-- JumpTo -->
    <s id="VizzyStudio.JumpTo.Tooltip">跳转到:将视图移到带标记的块.用以 // 开头的注释标记它们,例如 //发射,或用 //发射/俯仰程序 进行嵌套.</s>
    <s id="VizzyStudio.JumpTo.Title">跳转到</s>
-   <!-- Matrix -->
-   <s id="VizzyStudio.Matrix.Multiply.Format">矩阵相乘 A=(0),B=(1)</s>
-   <s id="VizzyStudio.Matrix.Multiply.Tooltip">3x3 矩阵乘法.两个输入都是按行排列的 9 元素列表 [m00..m22].\n需要 Vizzy Studio 模组</s>
-   <s id="VizzyStudio.Matrix.GetElement.Format">获取矩阵元素 M=(0),行=(1:Number),列=(2:Number)</s>
-   <s id="VizzyStudio.Matrix.GetElement.Tooltip">返回元素 M[行][列]. 行和列从 0 开始.\n需要 Vizzy Studio 模组</s>
-   <s id="VizzyStudio.Matrix.SetElement.Format">设置矩阵元素 M=(0),行=(1:Number),列=(2:Number),值=(3:Number)</s>
-   <s id="VizzyStudio.Matrix.SetElement.Tooltip">返回 M 的副本,其中元素 [行][列] 被替换为值.\n需要 Vizzy Studio 模组</s>
-   <s id="VizzyStudio.Matrix.Normalize.Format">归一化矩阵 M=(0),模式=(1:Number)</s>
-   <s id="VizzyStudio.Matrix.Normalize.Tooltip">模式 0: 归一化列, 1: 归一化行, 2: 按 Frobenius 范数缩放到长度 1.\n需要 Vizzy Studio 模组</s>
    <!-- Mfd -->
    <s id="VizzyStudio.Mfd.RestartQuestion">从头重启 {0} 的 MFD 程序?其控件将被移除,线程和变量将被重置.其他程序继续运行.</s>
    <!-- MfdSave -->

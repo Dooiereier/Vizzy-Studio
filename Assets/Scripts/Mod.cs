@@ -12,7 +12,6 @@ namespace Assets.Scripts
     {
         private static bool _checked;
         private static bool _started;
-        private static bool _debuggerLoaded;
         private static string _startupProblem;
 
         private Mod() : base()
@@ -20,9 +19,6 @@ namespace Assets.Scripts
         }
 
         public static Mod Instance { get; } = GetModInstance<Mod>();
-
-        /// <summary>Only a craft with a Matrix block needs the mod: every other program is plain stock XML.</summary>
-        public override bool IsModRequiredForCraft(ModApi.Craft.CraftData craftData) => MatrixBlocks.IsUsedBy(craftData);
 
         public override void OnModLoaded()
         {
@@ -45,7 +41,6 @@ namespace Assets.Scripts
                 return;
             }
 
-            _debuggerLoaded = assemblies.Contains("VizzyDebugger");
             var replaced = new[] { "VizzyDebugger", "Vizzy Exporter", "Vizzy McBlinky" }.Where(assemblies.Contains).ToList();
             if (replaced.Count > 0)
             {
@@ -82,21 +77,6 @@ namespace Assets.Scripts
             var applied = 0;
             var failed = 0;
             var patches = new List<Type> { typeof(FunkInputPatch), typeof(FunkHighlightRegisterPatch) };
-            try
-            {
-                // Before the toolbox patch: a block in the toolbox has to be able to save.
-                if (!_debuggerLoaded)
-                {
-                    MatrixBlocks.Register();
-                    patches.Add(typeof(MatrixToolboxPatch));
-                }
-            }
-            catch (Exception e)
-            {
-                failed++;
-                Debug.LogWarning("[VizzyStudio] Matrix blocks are off: " + e);
-            }
-
             foreach (var patch in patches)
             {
                 try

@@ -11,7 +11,7 @@ Vizzy Studio is still in development and has no release yet. It also includes th
 - Juno: New Origins, tested on 1.4.105 and 1.4.201
 - The **Juno Harmony** mod. Without it, Vizzy Studio stays off and tells you why.
 
-Crafts don't need the mod, unless a program on them uses a Matrix block.
+Crafts never need the mod: their programs stay ordinary Vizzy.
 
 ## Editing in flight
 
@@ -42,7 +42,6 @@ These work in the designer and in flight.
 
 - **Funk auto-fill:** suggests functions, variables, `FD.` and `OD.` data as you type. Up and Down choose, Enter or a click accepts, Esc closes. Variables known to hold a vector come with `v:`.
 - **Funk coloring:** colors each kind of name and marks errors in red.
-- **Matrix blocks:** four 3×3 matrix blocks at the bottom of Operators.
 - **Clean Variables:** in the menu, removes global variables the program doesn't use, after listing them. Another part's program or an InputController could still read them by name.
 - **Export Block:** in the menu. Click a block, then press this to copy it to another saved program, with the variables and custom blocks it needs. An instruction brings the blocks below it.
 - **Block Search:** press **Shift+F** or the search icon on the left bar, type part of a block's name, a dropdown choice, a variable, a list or a custom block, such as `+`, `wait` or `agl`, then drag the block out of the results, or double-click it to place it in view, without covering other blocks when there's room. Up and Down move the highlight through the results, starting at the top one, and Enter places the highlighted block the same way. The box empties after each block, ready for the next search, and Shift+F puts the cursor back in it if you clicked elsewhere.
