@@ -187,7 +187,7 @@
    <s id="VizzyStudio.Settings.Modifier">编辑器按键修饰键</s>
    <s id="VizzyStudio.Settings.ShowFlightButtons">显示飞行按钮</s>
    <s id="VizzyStudio.Settings.ArrangeMfd">排列 MFD</s>
-   <s id="VizzyStudio.Settings.EditorCulling">编辑器剔除 (实验性)</s>
+   <s id="VizzyStudio.Settings.EditorCulling">编辑器剔除</s>
    <s id="VizzyStudio.Settings.FunkSyntaxHighlight">Funk 语法高亮</s>
    <s id="VizzyStudio.Settings.FunkAutoFill">Funk 自动补全</s>
    <s id="VizzyStudio.Settings.CheckForUpdates.Description">游戏启动时,从 SimpleRockets.com 上的模组页面读取最新版本,如果更新,则询问是否打开该页面.不会自动下载任何内容.</s>

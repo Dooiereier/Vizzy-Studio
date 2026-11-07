@@ -43,19 +43,20 @@ These work in the designer and in flight.
 - **Funk auto-fill:** suggests functions, variables, `FD.` and `OD.` data as you type. Up and Down choose, Enter or a click accepts, Esc closes. Variables known to hold a vector come with `v:`.
 - **Funk coloring:** colors each kind of name and marks errors in red.
 - **Clean Variables:** in the menu, removes global variables the program doesn't use, after listing them. Another part's program or an InputController could still read them by name.
-- **Export Block:** in the menu. Click a block, then press this to copy it to another saved program, with the variables and custom blocks it needs. An instruction brings the blocks below it.
+- **Export Block:** in the menu. Click a block, then press this to copy it to another saved program, with the blocks below it and the variables, custom expressions and custom instructions it uses. Same-named ones already in the target are kept.
+- **Export Image:** in the menu. Saves the whole program as one PNG at the blocks' own size, in 256 colours, in `UserData/FlightPrograms/Vizzy Images`. A large program takes a few seconds; the editor is covered meanwhile.
 - **Block Search:** press **Shift+F** or the search icon on the left bar, type part of a block's name, a dropdown choice, a variable, a list or a custom block, such as `+`, `wait` or `agl`, then drag the block out of the results, or double-click it to place it in view, without covering other blocks when there's room. Up and Down move the highlight through the results, starting at the top one, and Enter places the highlighted block the same way. The box empties after each block, ready for the next search, and Shift+F puts the cursor back in it if you clicked elsewhere.
 - **Jump To:** on the left bar. Start a comment with `//` to tag the blocks after it, such as `//Launch` or `//Launch/Pitch Program`, then select the tag to move the view there. Tags are plain comments.
 
 ## Settings
 
-In the game's mod settings: the update check, debug logging, the editor key and its modifier, the flight buttons, Arrange MFD, Funk coloring and auto-fill, and Editor Culling. Export Block and Block Search are always on.
+In the game's mod settings: the update check, debug logging, the editor key and its modifier, the flight buttons, Arrange MFD, Funk coloring and auto-fill, and Editor Culling. Export Block, Export Image and Block Search are always on.
 
 The update check reads the latest version from the mod's page once per game start and offers to open the page. Nothing is downloaded automatically.
 
 ## Large programs
 
-The game's Vizzy editor gives every block and text field its own per-frame update, even far off screen, so large programs get slow to edit. **Editor Culling** (experimental, on by default) pauses that work for blocks well outside the view and switches it back on as they come near. With Debug Logging on, `Player.log` shows the average frame time and how many blocks are paused every few seconds, so you can compare it on and off.
+The game's Vizzy editor gives every block and text field its own per-frame update, even far off screen, so large programs get slow to edit. **Editor Culling** (on by default) pauses that work for whole stacks more than half a view outside the screen and switches them back on as they come near. After a program loads it waits until the program is fully built. Renaming, deleting, Undo and saving still reach every block. It stays off if another mod changes the Vizzy editor. With Debug Logging on, `Player.log` shows the frame time and how many blocks are paused every few seconds, and how long loading, saving and Apply take, so you can compare it on and off.
 
 ## Languages
 

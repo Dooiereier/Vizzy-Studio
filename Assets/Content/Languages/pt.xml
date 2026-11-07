@@ -187,7 +187,7 @@
    <s id="VizzyStudio.Settings.Modifier">Modificador da Tecla do Editor</s>
    <s id="VizzyStudio.Settings.ShowFlightButtons">Mostrar Botões de Voo</s>
    <s id="VizzyStudio.Settings.ArrangeMfd">Organizar MFD</s>
-   <s id="VizzyStudio.Settings.EditorCulling">Ocultação no Editor (Experimental)</s>
+   <s id="VizzyStudio.Settings.EditorCulling">Ocultação no Editor</s>
    <s id="VizzyStudio.Settings.FunkSyntaxHighlight">Realce de Sintaxe Funk</s>
    <s id="VizzyStudio.Settings.FunkAutoFill">Preenchimento Automático Funk</s>
    <s id="VizzyStudio.Settings.CheckForUpdates.Description">Ao iniciar o jogo, lê a versão mais recente na página do mod em SimpleRockets.com e, se for mais nova, oferece-se para abrir a página. Nada é transferido automaticamente.</s>

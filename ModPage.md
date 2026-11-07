@@ -18,7 +18,8 @@ Edit a running craft's Vizzy program in flight, in the game's own editor, withou
 * **Funk coloring:** colors each kind of name and marks errors in red.
 * **Export Block:** copies a block, with what's below it, to another saved program, with the variables and custom blocks it needs.
 * **Clean Unused Variables:** lists the global variables the program doesn't use, then removes them.
-* **Editor Culling** (experimental): large programs get slow to edit because every block keeps working even far off screen. This pauses blocks well outside the view and wakes them as they come near.
+* **Export Image:** saves the whole program as one PNG, readable at full size, to share or print.
+* **Editor Culling:** large programs get slow to edit because every block keeps working even far off screen. This pauses blocks well outside the view and wakes them as they come near, for a much higher frame rate.
 
 **Tip:** a block that has already run doesn't run again after Apply, so put the values you want to tune inside a loop.
 

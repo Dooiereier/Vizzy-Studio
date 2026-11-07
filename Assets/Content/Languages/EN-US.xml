@@ -187,7 +187,7 @@
    <s id="VizzyStudio.Settings.Modifier">Editor Key Modifier</s>
    <s id="VizzyStudio.Settings.ShowFlightButtons">Show Flight Buttons</s>
    <s id="VizzyStudio.Settings.ArrangeMfd">Arrange MFD</s>
-   <s id="VizzyStudio.Settings.EditorCulling">Editor Culling (Experimental)</s>
+   <s id="VizzyStudio.Settings.EditorCulling">Editor Culling</s>
    <s id="VizzyStudio.Settings.FunkSyntaxHighlight">Funk Syntax Highlight</s>
    <s id="VizzyStudio.Settings.FunkAutoFill">Funk Auto-Fill</s>
    <s id="VizzyStudio.Settings.CheckForUpdates.Description">At game start, reads the latest version from the mod's SimpleRockets.com page and, if it's newer, offers to open the page. Nothing is downloaded automatically.</s>
