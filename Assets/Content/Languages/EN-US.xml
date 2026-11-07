@@ -27,8 +27,8 @@
    <s id="VizzyStudio.Editor.CleanVariables">CLEAN VARIABLES</s>
    <s id="VizzyStudio.Editor.ExportBlockTooltip">Click a block on the canvas, then this, to copy it to another saved program. An instruction brings the blocks below it.</s>
    <s id="VizzyStudio.Editor.ExportBlock">EXPORT BLOCK</s>
-   <s id="VizzyStudio.Editor.SaveImageTooltip">Saves the whole program as one PNG at the blocks' own size, in the Program Images folder beside your saved programs.</s>
-   <s id="VizzyStudio.Editor.SaveImage">SAVE IMAGE</s>
+   <s id="VizzyStudio.Editor.ExportImageTooltip">Exports the whole program as one PNG at the blocks' own size, in the Program Images folder beside your saved programs.</s>
+   <s id="VizzyStudio.Editor.ExportImage">EXPORT IMAGE</s>
    <s id="VizzyStudio.Image.Saving">Saving image… {0} %</s>
    <s id="VizzyStudio.Image.Saved">Image saved: {0}</s>
    <s id="VizzyStudio.Image.Failed">Couldn't save the image. The log has the details.</s>
