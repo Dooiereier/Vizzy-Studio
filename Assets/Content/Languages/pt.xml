@@ -27,7 +27,7 @@
    <s id="VizzyStudio.Editor.CleanVariables">LIMPAR VARIÁVEIS</s>
    <s id="VizzyStudio.Editor.ExportBlockTooltip">Clica num bloco na área de trabalho e depois aqui para o copiar para outro programa guardado. Uma instrução leva os blocos abaixo dela.</s>
    <s id="VizzyStudio.Editor.ExportBlock">EXPORTAR BLOCO</s>
-   <s id="VizzyStudio.Editor.ExportImageTooltip">Exporta o programa inteiro como um PNG ao tamanho dos blocos, numa pasta Vizzy Images dentro da pasta dos programas guardados.</s>
+   <s id="VizzyStudio.Editor.ExportImageTooltip">Exporta toda a tela do Vizzy como uma imagem PNG. As imagens ficam em /UserData/FlightPrograms/Vizzy Images.</s>
    <s id="VizzyStudio.Editor.ExportImage">EXPORTAR IMAGEM</s>
    <s id="VizzyStudio.Image.Saving">A guardar a imagem… {0} %</s>
    <s id="VizzyStudio.Image.Saved">Imagem guardada: {0}</s>
