@@ -39,6 +39,35 @@ public static class PngStreamWriterTests
             check("PNG " + width + "x" + height + ": pixels", decoded != null && decoded.SequenceEqual(pixels));
         }
 
+        // An indexed image: the PLTE chunk and one index per pixel come back unchanged.
+        {
+            const int width = 300, height = 70;
+            var palette = new byte[17 * 3];
+            for (var i = 0; i < palette.Length; i++)
+            {
+                palette[i] = (byte)(i * 5);
+            }
+
+            var indexes = new byte[width * height];
+            for (var i = 0; i < indexes.Length; i++)
+            {
+                indexes[i] = (byte)((i / 37) % 17);
+            }
+
+            var file = new MemoryStream();
+            var png = new PngStreamWriter(file, width, height, palette);
+            for (var row = 0; row < height; row++)
+            {
+                png.WriteRow(indexes, row * width);
+            }
+
+            png.Finish();
+            var decoded = DecodeIndexed(file.ToArray(), out var foundPalette, out var chunksOk);
+            check("PNG indexed: chunk CRCs", chunksOk);
+            check("PNG indexed: palette", foundPalette != null && foundPalette.SequenceEqual(palette));
+            check("PNG indexed: indexes", decoded != null && decoded.SequenceEqual(indexes));
+        }
+
         var tooFew = new PngStreamWriter(new MemoryStream(), 2, 2);
         tooFew.WriteRow(new byte[6], 0);
         var threw = false;
@@ -115,6 +144,69 @@ public static class PngStreamWriterTests
         }
 
         return pixels;
+    }
+
+    private static byte[] DecodeIndexed(byte[] file, out byte[] palette, out bool chunksOk)
+    {
+        palette = null;
+        chunksOk = true;
+        var idat = new MemoryStream();
+        int width = 0, height = 0, colorType = -1;
+        var position = 8;
+        while (position < file.Length)
+        {
+            var length = (int)ReadBigEndian(file, position);
+            var type = System.Text.Encoding.ASCII.GetString(file, position + 4, 4);
+            chunksOk &= Crc(file, position + 4, length + 4) == ReadBigEndian(file, position + 8 + length);
+            if (type == "IHDR")
+            {
+                width = (int)ReadBigEndian(file, position + 8);
+                height = (int)ReadBigEndian(file, position + 12);
+                colorType = file[position + 17];
+            }
+            else if (type == "PLTE")
+            {
+                palette = new byte[length];
+                Array.Copy(file, position + 8, palette, 0, length);
+            }
+            else if (type == "IDAT")
+            {
+                idat.Write(file, position + 8, length);
+            }
+
+            position += 12 + length;
+        }
+
+        if (colorType != 3)
+        {
+            return null;
+        }
+
+        var zlib = idat.ToArray();
+        var raw = new MemoryStream();
+        using (var inflate = new DeflateStream(new MemoryStream(zlib, 2, zlib.Length - 6), CompressionMode.Decompress))
+        {
+            inflate.CopyTo(raw);
+        }
+
+        var data = raw.ToArray();
+        if (data.Length != height * (width + 1))
+        {
+            return null;
+        }
+
+        var indexes = new byte[width * height];
+        for (var row = 0; row < height; row++)
+        {
+            if (data[row * (width + 1)] != 0)
+            {
+                return null;
+            }
+
+            Array.Copy(data, (row * (width + 1)) + 1, indexes, row * width, width);
+        }
+
+        return indexes;
     }
 
     private static uint ReadBigEndian(byte[] data, int offset)

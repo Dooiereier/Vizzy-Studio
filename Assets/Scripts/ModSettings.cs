@@ -75,6 +75,16 @@ namespace Assets.Scripts
         Shift,
     }
 
+    /// <summary>The colours of a saved program image.</summary>
+    public enum ImageColours
+    {
+        [EnumOption("{VizzyStudio.Settings.ImageColours.Palette}", "{VizzyStudio.Settings.ImageColours.Palette.Description}")]
+        Palette,
+
+        [EnumOption("{VizzyStudio.Settings.ImageColours.Full}", "{VizzyStudio.Settings.ImageColours.Full.Description}")]
+        Full,
+    }
+
     /// <summary>The mod's settings (Settings → Mods → VizzyStudio).</summary>
     public class ModSettings : SettingsCategory<ModSettings>
     {
@@ -99,6 +109,8 @@ namespace Assets.Scripts
         public BoolSetting ArrangeMfd { get; private set; }
 
         public BoolSetting EditorCulling { get; private set; }
+
+        public EnumSetting<ImageColours> ImageColours { get; private set; }
 
         public BoolSetting FunkAutoFill { get; private set; }
 
@@ -174,6 +186,10 @@ namespace Assets.Scripts
             this.EditorCulling = this.CreateBool("{VizzyStudio.Settings.EditorCulling}", "EditorCulling")
                 .SetDescription("{VizzyStudio.Settings.EditorCulling.Description}")
                 .SetDefault(false);
+
+            this.ImageColours = this.CreateEnum<ImageColours>("{VizzyStudio.Settings.ImageColours}", "ImageColours")
+                .SetDescription("{VizzyStudio.Settings.ImageColours.Description}")
+                .SetDefault(Assets.Scripts.ImageColours.Palette);
 
             this.FunkSyntaxHighlight = this.CreateBool("{VizzyStudio.Settings.FunkSyntaxHighlight}", "FunkSyntaxHighlight")
                 .SetDescription("{VizzyStudio.Settings.FunkSyntaxHighlight.Description}")

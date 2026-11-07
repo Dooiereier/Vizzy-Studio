@@ -71,6 +71,11 @@ namespace Assets.Scripts
         // After a load, the next few frames' times are logged: the first one lays out what's switched on.
         private int _framesToLog;
 
+        // Culling waits after a load until the program is built and laid out (see Hold).
+        private bool _holding;
+        private float _holdStarted;
+        private int _lastBlockCount = -1;
+
         /// <summary>While true, everything stays switched on and unmasked, such as while the program is saved as an image.</summary>
         public bool Paused { get; set; }
 
@@ -94,8 +99,7 @@ namespace Assets.Scripts
                 }
             }
 
-            this.FirstPass();
-            this.LogLoad(-1);
+            this.Hold();
         }
 
         /// <summary>
@@ -247,10 +251,27 @@ namespace Assets.Scripts
             }
 
             // Stacks come and go with editing and undo; a new one starts switched on, which is safe.
-            if (measure)
+            if (measure || _holding)
             {
                 _nextRefresh = Time.unscaledTime + RefreshInterval;
                 this.Measure(program);
+            }
+
+            if (_holding)
+            {
+                var waited = Time.realtimeSinceStartup - _holdStarted;
+                var built = _unsized.Count == 0 && _blocks.Count > 0 && _blocks.Count == _lastBlockCount;
+                _lastBlockCount = _blocks.Count;
+                if (!built && waited < 30f)
+                {
+                    return;
+                }
+
+                _holding = false;
+                if (ModSettings.Instance.DebugLogging.Value)
+                {
+                    EditorLog.Debug("Editor: built (" + _blocks.Count + " blocks in " + _stacks.Count + " stacks) " + waited.ToString("0.0") + " s after loading" + (built ? "" : ", or still not quite") + "; culling starts.");
+                }
             }
 
             if (!culling)
@@ -310,27 +331,20 @@ namespace Assets.Scripts
         }
 
         /// <summary>
-        /// A pass right away, when the editor connects and right after a program loads: the blocks are created
-        /// then but lay out on their first active frame, so stacks switched off now never lay out until they're
-        /// near. Their sizes aren't known yet, so they're estimated (generously), and measured again soon.
+        /// When the editor connects and after every program load, culling waits until the program is fully
+        /// built: the game creates the stacks' blocks at once, but builds the blocks inside them (expressions)
+        /// and lays everything out only in their first active frames. Until then sizes are unknown, so a stack
+        /// switched off early could be one that reaches into the view. It's done once no block is without a
+        /// size and the number of blocks stopped growing between two measurements (or after 30 s).
         /// </summary>
-        public void FirstPass()
+        public void Hold()
         {
-            try
-            {
-                if (!this.isActiveAndEnabled || this.Paused || _blocked != null || !ModSettings.Instance.EditorCulling.Value)
-                {
-                    return;
-                }
-
-                this.Pass(true, true);
-                _nextRefresh = Time.unscaledTime + CheckInterval;
-                _nextCheck = Time.unscaledTime + CheckInterval;
-            }
-            catch (Exception e)
-            {
-                EditorLog.Warning("Editor culling's first pass failed: " + e.Message);
-            }
+            this.RestoreAll();
+            _holding = true;
+            _holdStarted = Time.realtimeSinceStartup;
+            _lastBlockCount = -1;
+            _nextCheck = 0f;
+            _nextRefresh = 0f;
         }
 
         /// <summary>After a stock program load: the editor's first pass, and with Debug Logging the time.</summary>
@@ -340,7 +354,7 @@ namespace Assets.Scripts
             {
                 if (culling != null && culling._controller != null && ReferenceEquals(culling._controller.VizzyUI, vizzyUI))
                 {
-                    culling.FirstPass();
+                    culling.Hold();
                     culling.LogLoad(milliseconds);
                     return;
                 }
@@ -356,8 +370,11 @@ namespace Assets.Scripts
         {
             if (ModSettings.Instance.DebugLogging.Value)
             {
-                var blocks = _stackBlocks.Values.Sum();
-                EditorLog.Debug("Editor: " + (milliseconds < 0 ? "culling connected" : "program loaded in " + milliseconds + " ms") + " (" + blocks + " blocks); first pass switched off " + _off.Count + " of " + _stacks.Count + " stacks.");
+                if (milliseconds >= 0)
+                {
+                    EditorLog.Debug("Editor: program loaded in " + milliseconds + " ms; culling waits for it to be built.");
+                }
+
                 _framesToLog = 3;
             }
         }
@@ -665,6 +682,35 @@ namespace Assets.Scripts
             catch (Exception e)
             {
                 EditorLog.Warning("Editor culling after loading failed: " + e.Message);
+            }
+        }
+    }
+
+    /// <summary>
+    /// With Debug Logging, how long the stock editor takes to save, apply and close, with culling on or off, to
+    /// compare. SaveFlightProgram reads every stack through the program transform's children, switched off or
+    /// not (IL, 2026-11-07), so culling can't lose blocks there.
+    /// </summary>
+    [HarmonyPatch]
+    public static class EditorTimingPatch
+    {
+        private static IEnumerable<MethodBase> TargetMethods()
+        {
+            yield return AccessTools.Method(typeof(VizzyUIScript), "SaveFlightProgram");
+            yield return AccessTools.Method(typeof(VizzyUIScript), "ApplyChangesToCraft");
+            yield return AccessTools.Method(typeof(VizzyUIScript), "Close");
+        }
+
+        private static void Prefix(out System.Diagnostics.Stopwatch __state)
+        {
+            __state = ModSettings.Instance.DebugLogging.Value ? System.Diagnostics.Stopwatch.StartNew() : null;
+        }
+
+        private static void Postfix(System.Diagnostics.Stopwatch __state, MethodBase __originalMethod)
+        {
+            if (__state != null)
+            {
+                EditorLog.Debug("Editor: " + __originalMethod.Name + " took " + __state.ElapsedMilliseconds + " ms, culling " + (ModSettings.Instance.EditorCulling.Value ? "on" : "off") + ".");
             }
         }
     }

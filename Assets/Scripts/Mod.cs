@@ -79,7 +79,7 @@ namespace Assets.Scripts
             var harmony = new HarmonyLib.Harmony(HarmonyId);
             var applied = 0;
             var failed = 0;
-            var patches = new List<Type> { typeof(FunkInputPatch), typeof(FunkHighlightRegisterPatch), typeof(EditorCullingLookupPatch), typeof(EditorCullingVariablePatch), typeof(EditorCullingLoadPatch) };
+            var patches = new List<Type> { typeof(FunkInputPatch), typeof(FunkHighlightRegisterPatch), typeof(EditorCullingLookupPatch), typeof(EditorCullingVariablePatch), typeof(EditorCullingLoadPatch), typeof(EditorTimingPatch) };
             foreach (var patch in patches)
             {
                 try

@@ -6,8 +6,9 @@ namespace Assets.Scripts
     using System.Text;
 
     /// <summary>
-    /// Writes an 8-bit RGB PNG row by row, straight to a stream, so an image larger than memory or than
-    /// Unity's texture limit can be saved. Rows go in top to bottom; <see cref="Finish"/> closes the image.
+    /// Writes an 8-bit PNG row by row, straight to a stream, so an image larger than memory or than Unity's
+    /// texture limit can be saved: RGB, or with a palette of up to 256 colours, one index byte per pixel.
+    /// Rows go in top to bottom; <see cref="Finish"/> closes the image.
     /// </summary>
     public sealed class PngStreamWriter : IDisposable
     {
@@ -20,54 +21,82 @@ namespace Assets.Scripts
         private readonly IdatStream _idat;
         private readonly DeflateStream _deflate;
         private readonly byte[] _row;
+        private readonly int _bytesPerPixel;
         private int _rows;
         private uint _adlerA = 1;
         private uint _adlerB;
         private bool _finished;
 
-        public PngStreamWriter(Stream output, int width, int height)
+        /// <param name="palette">RGB triples of up to 256 colours for an indexed image, or null for RGB.</param>
+        public PngStreamWriter(Stream output, int width, int height, byte[] palette = null)
         {
             if (width <= 0 || height <= 0)
             {
                 throw new ArgumentException("An image needs at least one pixel.");
             }
 
+            if (palette != null && (palette.Length == 0 || palette.Length % 3 != 0 || palette.Length > 256 * 3))
+            {
+                throw new ArgumentException("A palette has 1 to 256 RGB colours.");
+            }
+
             _output = output;
             _width = width;
             _height = height;
-            _row = new byte[1 + (width * 3)];
+            _bytesPerPixel = palette == null ? 3 : 1;
+            _row = new byte[1 + (width * _bytesPerPixel)];
 
             _output.Write(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 }, 0, 8);
             var header = new byte[13];
             WriteBigEndian(header, 0, (uint)width);
             WriteBigEndian(header, 4, (uint)height);
             header[8] = 8; // bit depth
-            header[9] = 2; // RGB
+            header[9] = (byte)(palette == null ? 2 : 3); // RGB, or indexed
             WriteChunk(_output, "IHDR", header, header.Length);
+            if (palette != null)
+            {
+                WriteChunk(_output, "PLTE", palette, palette.Length);
+            }
 
             // zlib around raw deflate: a header here, the Adler-32 of the raw data at the end.
             _idat = new IdatStream(_output);
             _idat.Write(new byte[] { 0x78, 0x01 }, 0, 2);
-            _deflate = new DeflateStream(_idat, CompressionLevel.Fastest, true);
+            _deflate = new DeflateStream(_idat, CompressionLevel.Optimal, true);
         }
 
         public int RowsWritten => _rows;
 
-        /// <summary>One row: width × 3 bytes (R, G, B) from <paramref name="rgb"/> at <paramref name="offset"/>.</summary>
-        public void WriteRow(byte[] rgb, int offset)
+        /// <summary>
+        /// One row from <paramref name="data"/> at <paramref name="offset"/>: width × 3 bytes (R, G, B), or with a
+        /// palette width bytes of colour indexes.
+        /// </summary>
+        public void WriteRow(byte[] data, int offset)
         {
             if (_finished || _rows >= _height)
             {
                 throw new InvalidOperationException("The image already has all its rows.");
             }
 
-            // Filter "Sub": each byte minus the one a pixel to its left, which turns plain areas into zeros.
-            _row[0] = 1;
-            var length = _width * 3;
-            for (var i = 0; i < length; i++)
+            var length = _width * _bytesPerPixel;
+            if (_bytesPerPixel == 1)
             {
-                var left = i >= 3 ? rgb[offset + i - 3] : (byte)0;
-                _row[1 + i] = (byte)(rgb[offset + i] - left);
+                // Indexes don't filter well; the PNG specification advises none for them.
+                _row[0] = 0;
+                Buffer.BlockCopy(data, offset, _row, 1, length);
+            }
+            else
+            {
+                // Filter "Sub": each byte minus the one a pixel to its left, which turns plain areas into zeros.
+                _row[0] = 1;
+                for (var i = 0; i < 3; i++)
+                {
+                    _row[1 + i] = data[offset + i];
+                }
+
+                for (var i = 3; i < length; i++)
+                {
+                    _row[1 + i] = (byte)(data[offset + i] - data[offset + i - 3]);
+                }
             }
 
             this.Adler(_row);

@@ -22,7 +22,7 @@ POSIX_HELPER = f"{compile_check.UNITY}/Frameworks/MonoBleedingEdge/MonoEmbedRunt
 def main():
     csproj = compile_check.find_csproj()
     references, defines = compile_check.read_references(csproj, os.path.join(ROOT, "Assets", "ModTools"))
-    sources = [os.path.join(ROOT, "Assets", "Scripts", name) for name in ("ThreadRemapper.cs", "LatestEdits.cs", "FunkCompletion.cs", "ModPageVersion.cs", "BlockSearch.cs", "BlockPlacement.cs", "Mfd/VizzyExpressionSolver.cs", "Mfd/MfdFormulaWriter.cs", "Text.cs", "PngStreamWriter.cs")]
+    sources = [os.path.join(ROOT, "Assets", "Scripts", name) for name in ("ThreadRemapper.cs", "LatestEdits.cs", "FunkCompletion.cs", "ModPageVersion.cs", "BlockSearch.cs", "BlockPlacement.cs", "Mfd/VizzyExpressionSolver.cs", "Mfd/MfdFormulaWriter.cs", "Text.cs", "PngStreamWriter.cs", "PaletteQuantizer.cs")]
     sources += sorted(glob.glob(os.path.join(ROOT, "tests", "*.cs")))
     with tempfile.TemporaryDirectory() as temp:
         program = os.path.join(temp, "Tests.exe")

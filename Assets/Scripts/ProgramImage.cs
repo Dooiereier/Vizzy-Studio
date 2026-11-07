@@ -5,6 +5,7 @@ namespace Assets.Scripts
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
+    using System.Threading.Tasks;
     using Assets.Scripts.Vizzy.UI;
     using Assets.Scripts.Vizzy.UI.Elements;
     using TMPro;
@@ -48,6 +49,8 @@ namespace Assets.Scripts
         private string _path;
         private EditorCulling _culling;
         private bool _moved;
+        private Task _work;
+        private volatile bool _cancelled;
 
         public static void Save(VizzyUIController controller)
         {
@@ -64,6 +67,7 @@ namespace Assets.Scripts
 
             var image = controller.gameObject.GetComponent<ProgramImage>() ?? controller.gameObject.AddComponent<ProgramImage>();
             image._controller = controller;
+            image._cancelled = false;
             _running = image;
             image.StartCoroutine(image.Run());
         }
@@ -77,10 +81,35 @@ namespace Assets.Scripts
                 yield break;
             }
 
-            // Blocks never shown yet are built in their first active frame, and laid out in the next.
-            yield return null;
-            yield return null;
+            // Blocks never shown are built in their first active frames, the blocks inside them after that, and
+            // laid out last: wait until no block is without a size and the count stopped growing.
+            var building = Stopwatch.StartNew();
+            var lastCount = -1;
+            var frame = 0;
+            while (building.Elapsed.TotalSeconds < 60)
+            {
+                yield return null;
+                if (++frame % 3 != 0)
+                {
+                    continue;
+                }
 
+                var count = 0;
+                var unsized = 0;
+                if (!this.Try("wait", () => unsized = BuildState(program, out count)))
+                {
+                    yield break;
+                }
+
+                if (unsized == 0 && count == lastCount)
+                {
+                    break;
+                }
+
+                lastCount = count;
+            }
+
+            building.Stop();
             Rect box = default;
             var width = 0;
             var height = 0;
@@ -96,54 +125,147 @@ namespace Assets.Scripts
 
                 width = Mathf.Max(1, Mathf.CeilToInt(box.width * scale));
                 height = Mathf.Max(1, Mathf.CeilToInt(box.height * scale));
-                var canvas = _controller.ProgramContainer.GetComponentInParent<Canvas>();
-                var root = canvas == null ? null : canvas.rootCanvas;
-                EditorLog.Debug("Image: editor canvas " + (root == null ? "none" : root.renderMode + ", scale factor " + root.scaleFactor.ToString("0.###"))
-                    + ", zoom " + program.localScale.x.ToString("0.###") + ", program box " + box.width.ToString("0") + " x " + box.height.ToString("0")
-                    + ", image " + width + " x " + height + " at scale " + scale.ToString("0.###") + ".");
+                EditorLog.Debug("Image: zoom " + program.localScale.x.ToString("0.###") + ", program box " + box.width.ToString("0") + " x " + box.height.ToString("0")
+                    + ", image " + width + " x " + height + " at scale " + scale.ToString("0.###") + ", " + lastCount + " blocks built in " + building.ElapsedMilliseconds + " ms.");
                 this.Prepare(program, box, scale, width, height);
             }))
             {
                 yield break;
             }
 
+            var palette = ModSettings.Instance.ImageColours.Value == ImageColours.Palette;
             var columns = (width + TileWidth - 1) / TileWidth;
             var bands = (height + TileHeight - 1) / TileHeight;
-            var band = new byte[width * TileHeight * 3];
+            var steps = bands * columns * (palette ? 2 : 1);
+            var step = 0;
+            var buffers = new[] { new byte[width * TileHeight * 3], new byte[width * TileHeight * 3] };
+            var busy = new Task[] { Task.CompletedTask, Task.CompletedTask };
+            _work = Task.CompletedTask;
             var render = new Stopwatch();
+            var waiting = new Stopwatch();
             var tilesThisFrame = 0;
-            for (var row = 0; row < bands; row++)
+
+            // With a palette, a first pass counts the colours, and the second writes the image.
+            var quantizer = palette ? new PaletteQuantizer() : null;
+            byte[] lookup = null;
+            byte[] colours = null;
+            for (var pass = palette ? 0 : 1; pass < 2; pass++)
             {
-                var rowsInBand = Math.Min(TileHeight, height - (row * TileHeight));
-                for (var column = 0; column < columns; column++)
+                if (pass == 1)
                 {
-                    var r = row;
-                    var c = column;
-                    render.Start();
-                    if (!this.Try("render", () => this.RenderTile(c, r, width, rowsInBand, band)))
+                    if (palette)
                     {
+                        _work = _work.ContinueWith(previous =>
+                        {
+                            previous.Wait();
+                            colours = quantizer.Build(256, out lookup);
+                        });
+                        waiting.Start();
+                        while (!_work.IsCompleted)
+                        {
+                            yield return null;
+                        }
+
+                        waiting.Stop();
+                    }
+
+                    if (_work.IsFaulted)
+                    {
+                        this.Fail("colours", _work.Exception);
                         yield break;
                     }
 
-                    render.Stop();
-                    if (++tilesThisFrame >= TilesPerFrame)
+                    if (!this.Try("open", () => _png = new PngStreamWriter(_file, width, height, colours)))
                     {
-                        tilesThisFrame = 0;
-                        this.SetProgress((row * columns) + column + 1, bands * columns);
-                        yield return null;
+                        yield break;
                     }
                 }
 
-                if (!this.Try("write", () =>
+                var indexes = palette ? new byte[width] : null;
+                for (var row = 0; row < bands; row++)
                 {
-                    for (var y = 0; y < rowsInBand; y++)
+                    var k = row % 2;
+                    var buffer = buffers[k];
+                    waiting.Start();
+                    while (!busy[k].IsCompleted)
                     {
-                        _png.WriteRow(band, y * width * 3);
+                        yield return null;
                     }
-                }))
-                {
-                    yield break;
+
+                    waiting.Stop();
+                    if (busy[k].IsFaulted)
+                    {
+                        this.Fail("encode", busy[k].Exception);
+                        yield break;
+                    }
+
+                    var rowsInBand = Math.Min(TileHeight, height - (row * TileHeight));
+                    for (var column = 0; column < columns; column++)
+                    {
+                        var r = row;
+                        var c = column;
+                        render.Start();
+                        if (!this.Try("render", () => this.RenderTile(c, r, width, rowsInBand, buffer)))
+                        {
+                            yield break;
+                        }
+
+                        render.Stop();
+                        step++;
+                        if (++tilesThisFrame >= TilesPerFrame)
+                        {
+                            tilesThisFrame = 0;
+                            this.SetProgress(step, steps);
+                            yield return null;
+                        }
+                    }
+
+                    // The band goes to the background thread: counted on the first pass, written on the second.
+                    var counting = pass == 0;
+                    var png = _png;
+                    _work = _work.ContinueWith(previous =>
+                    {
+                        previous.Wait();
+                        if (_cancelled)
+                        {
+                            return;
+                        }
+
+                        for (var y = 0; y < rowsInBand; y++)
+                        {
+                            if (counting)
+                            {
+                                if (y % 2 == 0)
+                                {
+                                    quantizer.Sample(buffer, y * width * 3, width, 2);
+                                }
+                            }
+                            else if (indexes != null)
+                            {
+                                PaletteQuantizer.Map(lookup, buffer, y * width * 3, indexes, 0, width);
+                                png.WriteRow(indexes, 0);
+                            }
+                            else
+                            {
+                                png.WriteRow(buffer, y * width * 3);
+                            }
+                        }
+                    });
+                    busy[k] = _work;
                 }
+            }
+
+            waiting.Start();
+            while (!_work.IsCompleted)
+            {
+                yield return null;
+            }
+
+            waiting.Stop();
+            if (_work.IsFaulted)
+            {
+                this.Fail("encode", _work.Exception);
+                yield break;
             }
 
             if (this.Try("finish", () => _png.Finish()))
@@ -151,10 +273,28 @@ namespace Assets.Scripts
                 var path = _path;
                 var bytes = _file.Length;
                 this.End(false);
-                EditorLog.Info("Saved the program image " + path + ": " + width + " x " + height + ", " + (bytes / (1024f * 1024f)).ToString("0.0") + " MB, "
-                    + (bands * columns) + " tiles, rendering " + render.ElapsedMilliseconds + " ms, in all " + total.ElapsedMilliseconds + " ms.");
+                EditorLog.Info("Saved the program image " + path + ": " + width + " x " + height + (palette ? " in " + (colours.Length / 3) + " colours" : " in full colour") + ", "
+                    + (bytes / (1024f * 1024f)).ToString("0.0") + " MB, " + (bands * columns) + " tiles; building " + building.ElapsedMilliseconds + " ms, rendering "
+                    + render.ElapsedMilliseconds + " ms, waiting for the encoder " + waiting.ElapsedMilliseconds + " ms, in all " + total.ElapsedMilliseconds + " ms.");
                 _controller.ShowMessage(Text.Get("VizzyStudio.Image.Saved", path), 8f);
             }
+        }
+
+        /// <summary>How many blocks have no size yet (not laid out); <paramref name="count"/> is all blocks.</summary>
+        private static int BuildState(RectTransform program, out int count)
+        {
+            var blocks = program.GetComponentsInChildren<BlockElementScript>(true);
+            count = blocks.Length;
+            var unsized = 0;
+            foreach (var block in blocks)
+            {
+                if (block != null && !block.IsDestroyed && (block.Size.x <= 0f || block.Size.y <= 0f))
+                {
+                    unsized++;
+                }
+            }
+
+            return unsized;
         }
 
         private void Begin(RectTransform program)
@@ -208,7 +348,6 @@ namespace Assets.Scripts
             name = string.IsNullOrEmpty(name) ? "Program" : string.Concat(name.Select(ch => Path.GetInvalidFileNameChars().Contains(ch) ? '_' : ch));
             _path = Path.Combine(folder, name + " " + DateTime.Now.ToString("yyyy-MM-dd HH.mm.ss") + ".png");
             _file = new FileStream(_path, FileMode.Create, FileAccess.Write, FileShare.None, 1 << 20);
-            _png = new PngStreamWriter(_file, width, height);
 
             // A world-space canvas at the origin, one unit per pixel; the camera moves over it tile by tile.
             _captureRoot = new GameObject("VizzyStudioProgramImage");
@@ -338,20 +477,40 @@ namespace Assets.Scripts
             }
             catch (Exception e)
             {
-                EditorLog.Error("Couldn't save the program image (" + step + "): " + e);
-                this.End(true);
-                if (_controller != null)
-                {
-                    _controller.ShowMessage(Text.Get("VizzyStudio.Image.Failed"), 5f);
-                }
-
+                this.Fail(step, e);
                 return false;
+            }
+        }
+
+        private void Fail(string step, Exception e)
+        {
+            EditorLog.Error("Couldn't save the program image (" + step + "): " + e);
+            this.End(true);
+            if (_controller != null)
+            {
+                _controller.ShowMessage(Text.Get("VizzyStudio.Image.Failed"), 5f);
             }
         }
 
         /// <summary>Everything back as it was; an unfinished file is deleted.</summary>
         private void End(bool failed)
         {
+            // The background thread may still be writing: it stops at its next band, and the file is closed
+            // only once it has (or right away if it's done).
+            _cancelled = true;
+            if (_work != null && !_work.IsCompleted)
+            {
+                try
+                {
+                    _work.Wait(5000);
+                }
+                catch (Exception)
+                {
+                    // Its failure is already reported, or doesn't matter while giving up.
+                }
+            }
+
+            _work = null;
             if (_moved && _program != null && _parent != null)
             {
                 _program.SetParent(_parent, false);

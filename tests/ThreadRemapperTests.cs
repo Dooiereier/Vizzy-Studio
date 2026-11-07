@@ -50,6 +50,7 @@ public static class ThreadRemapperTests
         BlockSearchTests.Run(Check);
         BlockPlacementTests.Run(Check);
         PngStreamWriterTests.Run(Check);
+        PaletteQuantizerTests.Run(Check);
         MfdFormulaWriterTests.Run(Check);
 
         Console.WriteLine($"{_passed} passed, {_failed} failed.");
