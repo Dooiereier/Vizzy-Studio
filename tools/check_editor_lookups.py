@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Lists the game's Vizzy editor methods that look up objects in a way that skips inactive ones.
 
-Editor Culling switches stacks of blocks off (inactive). Unity's GetComponentsInChildren(),
-GetComponentInChildren() and FindObject(s)OfType() skip inactive objects unless told otherwise,
-so a stock method that collects the editor's blocks that way would miss the switched-off stacks.
+Editor Culling switches stacks of blocks off (inactive). Unity's GetComponent(s)InChildren(),
+GetComponent(s)InParent() and FindObject(s)OfType() skip inactive objects unless told otherwise,
+and activeInHierarchy / isActiveAndEnabled are false for them, so a stock method that finds the
+editor's blocks, or a block's parents, that way would miss or mishandle the switched-off stacks.
 Each such method is listed with a verdict in tools/editor_lookups.txt: patched (the mod switches
 the stacks back on before it) or harmless (and why). This finds every method in the Vizzy editor
 namespaces that makes such a call, and fails when one isn't in the list, so a Juno update that adds
@@ -27,7 +28,8 @@ LIST = os.path.join(ROOT, "tools", "editor_lookups.txt")
 GAME = os.path.expanduser(
     "~/Library/Application Support/Steam/steamapps/common/SimpleRockets2/SimpleRockets2.app/"
     "Contents/Resources/Data/Managed/SimpleRockets2.dll")
-LOOKUPS = {"GetComponentsInChildren", "GetComponentInChildren", "FindObjectsOfType", "FindObjectOfType"}
+LOOKUPS = {"GetComponentsInChildren", "GetComponentInChildren", "GetComponentInParent", "GetComponentsInParent",
+           "FindObjectsOfType", "FindObjectOfType", "get_activeInHierarchy", "get_isActiveAndEnabled"}
 NAMESPACE = "Assets.Scripts.Vizzy"
 LDC_I4_1 = 0x17
 

@@ -1,7 +1,11 @@
-# Stock Vizzy editor methods whose lookups skip inactive objects (GetComponent(s)InChildren without
-# includeInactive: true, FindObject(s)OfType), as tools/check_editor_lookups.py finds them, and why
-# each is safe with Editor Culling. "patched": EditorCullingLookupPatch makes its lookups see switched-off stacks.
-# Reviewed against Juno 1.4.105 and 1.4.201 (IL, 2026-11-06).
+# Stock Vizzy editor methods whose lookups skip inactive objects (GetComponent(s)InChildren and
+# GetComponent(s)InParent without includeInactive: true, FindObject(s)OfType, activeInHierarchy,
+# isActiveAndEnabled), as tools/check_editor_lookups.py finds them, and why each is safe with Editor
+# Culling. "patched": EditorCullingLookupPatch makes its lookups see switched-off stacks. Stock code reaches
+# blocks in switched-off stacks only through those patched lookups, so what it then does with them counts:
+# RenameVariable and DeleteVariable get the variable's stacks switched on first (EditorCullingVariablePatch),
+# LoadFlightProgram throws the whole old program away, and CanDeleteSelection only reads nodes.
+# Reviewed against Juno 1.4.105 and 1.4.201 (IL, 2026-11-06; parent lookups and active checks 2026-11-07).
 VizzyUIScript.GetVariableElements patched: whole program; behind RenameVariable and DeleteVariable (and Clean Variables).
 VizzyUIScript.CanDeleteSelection patched: whole program.
 VizzyUIScript.LoadFlightProgram patched: destroys the old program's blocks before loading (Load, Import, New, Undo, Redo).
@@ -13,3 +17,8 @@ DropdownItemScript.Initialize harmless: inside a dropdown item.
 ListElementScript.Awake harmless: inside the block itself.
 ListElementScript.Update harmless: inside the block itself; doesn't run while switched off.
 VariableElementScript.Awake harmless: inside the block itself.
+BlockElementScript.get_Parent harmless: a block's parent block; only met on switched-off blocks through the patched lookups (see the top).
+ExpressionElementScript.get_ExpressionSlot harmless: same as get_Parent.
+ExpressionElementScript.RemoveFromExpressionSlot patched around: from Destroy, to put a constant in the deleted block's place; DeleteVariable's stacks come on first (EditorCullingVariablePatch); found by the 2026-11-07 review.
+ContextMenuButtonScript.Awake harmless: a context menu button, not a program block.
+VizzyUIController.UpdateCategory harmless: the toolbox categories, not the program.

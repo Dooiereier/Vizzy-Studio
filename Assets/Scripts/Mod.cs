@@ -79,7 +79,7 @@ namespace Assets.Scripts
             var harmony = new HarmonyLib.Harmony(HarmonyId);
             var applied = 0;
             var failed = 0;
-            var patches = new List<Type> { typeof(FunkInputPatch), typeof(FunkHighlightRegisterPatch), typeof(EditorCullingLookupPatch), typeof(EditorCullingVariablePatch), typeof(EditorCullingLoadPatch), typeof(EditorTimingPatch), typeof(LoadMenuViewPatch) };
+            var patches = new List<Type> { typeof(FunkInputPatch), typeof(FunkHighlightRegisterPatch), typeof(EditorCullingLookupPatch), typeof(EditorCullingVariablePatch), typeof(EditorCullingLoadPatch), typeof(LoadMenuViewPatch) };
             foreach (var patch in patches)
             {
                 try
@@ -96,9 +96,9 @@ namespace Assets.Scripts
                 {
                     failed++;
                     Debug.LogWarning("[VizzyStudio] Patch " + patch.Name + " failed: " + e);
-                    if (patch == typeof(EditorCullingLookupPatch) || patch == typeof(EditorCullingVariablePatch))
+                    if (patch == typeof(EditorCullingLookupPatch) || patch == typeof(EditorCullingVariablePatch) || patch == typeof(EditorCullingLoadPatch))
                     {
-                        // Without them culling could hide blocks from a rename, delete or Undo.
+                        // Without them culling could hide blocks from a rename, delete or Undo, or measure unbuilt stacks.
                         EditorCulling.Unavailable = "its patch " + patch.Name + " didn't apply";
                     }
                 }

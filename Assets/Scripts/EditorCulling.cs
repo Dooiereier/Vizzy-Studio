@@ -18,12 +18,14 @@ namespace Assets.Scripts
     /// Update every frame and Unity lays out and draws them all, on screen or not, so large programs get slow
     /// to edit. This switches whole stacks off (their GameObjects inactive) while they're well outside the
     /// view, and on again as they come near, and masks the view so Unity leaves out what's outside it.
-    /// The program is saved from the editor's node tree, so it isn't affected. A few stock methods look only
-    /// at active blocks; <see cref="EditorCullingRestorePatch"/> switches everything on before them.
+    /// The save reads every stack, switched off or not. Stock code that looks only at active blocks is handled
+    /// by <see cref="EditorCullingLookupPatch"/> and <see cref="EditorCullingVariablePatch"/>; the full list of
+    /// such stock code is tools/editor_lookups.txt.
     /// </summary>
     public sealed class EditorCulling : MonoBehaviour
     {
         private const float CheckInterval = 0.25f;
+        private const float PanCheckInterval = 0.1f;
         private const float RefreshInterval = 2f;
         private const float LogInterval = 5f;
 
@@ -119,7 +121,7 @@ namespace Assets.Scripts
                     type = type.DeclaringType;
                 }
 
-                if (type == null || type.Namespace == null || !type.Namespace.StartsWith("Assets.Scripts.Vizzy", StringComparison.Ordinal))
+                if (type == null || type.Namespace == null || !type.Namespace.StartsWith("Assets.Scripts.Vizzy.UI", StringComparison.Ordinal))
                 {
                     continue;
                 }
@@ -222,14 +224,15 @@ namespace Assets.Scripts
                     }
                 }
 
-                // Nothing changes while a button is held: a drag may be carrying blocks across the view.
+                // Nothing changes while blocks are dragged (they may be carried across the view), but culling
+                // keeps up while the canvas itself is dragged, checking more often then.
                 var now = Time.unscaledTime;
-                if (now < _nextCheck || MouseHeld())
+                if (now < _nextCheck || (_controller?.VizzyUI as VizzyUIScript)?.DragSelection != null)
                 {
                     return;
                 }
 
-                _nextCheck = now + CheckInterval;
+                _nextCheck = now + (MouseHeld() ? PanCheckInterval : CheckInterval);
                 this.Pass(culling, now >= _nextRefresh);
             }
             catch (Exception e)
@@ -354,41 +357,52 @@ namespace Assets.Scripts
         }
 
         /// <summary>
-        /// Blocks changed while their stack was switched off, such as renamed variables: they laid out without
-        /// their text being measured (TextMeshPro doesn't update while inactive), so they keep their old width.
-        /// Their stacks come on, the blocks lay out again in their next frame, and culling holds off for a moment.
+        /// Switches on the stacks holding blocks of the global variable <paramref name="name"/>, before stock code
+        /// renames or deletes it. Stock code works on a block through its parents (a deleted variable block finds
+        /// its slot with GetComponentInParent, which skips inactive objects, to put a constant there in the
+        /// program), and a switched-off block can't measure its text to lay out. So stock code must never meet a
+        /// switched-off block: these stacks come on first, and culling holds off for a moment so their layout runs.
         /// </summary>
-        public static void Relayout(object vizzyUI, List<BlockElementScript> blocks)
+        public static int SwitchOnStacksUsing(object vizzyUI, string name)
         {
-            if (blocks == null || blocks.Count == 0)
-            {
-                return;
-            }
-
+            var switched = 0;
             foreach (var culling in Instances)
             {
-                if (culling == null || culling._controller == null || !ReferenceEquals(culling._controller.VizzyUI, vizzyUI))
+                if (culling == null || culling._off.Count == 0 || culling._controller == null || !ReferenceEquals(culling._controller.VizzyUI, vizzyUI))
                 {
                     continue;
                 }
 
-                foreach (var block in blocks)
+                var program = (vizzyUI as VizzyUIScript)?.ProgramTransform;
+                if (program == null)
                 {
+                    continue;
+                }
+
+                foreach (var block in program.GetComponentsInChildren<BlockElementScript>(true))
+                {
+                    if (block == null || block.IsDestroyed || block.gameObject.activeInHierarchy
+                        || !(block.Node is ModApi.Craft.Program.VariableExpression variable) || variable.IsLocal || variable.VariableName != name)
+                    {
+                        continue;
+                    }
+
                     for (var t = block.transform; t != null; t = t.parent)
                     {
                         if (culling._off.Remove(t))
                         {
                             Off.Remove(t);
                             t.gameObject.SetActive(true);
+                            switched++;
                             break;
                         }
                     }
-
-                    block.OnChildSizeChanged();
                 }
 
                 culling._nextCheck = Time.unscaledTime + 1f;
             }
+
+            return switched;
         }
 
         /// <summary>After a stock program load: the editor's first pass, and with Debug Logging the time.</summary>
@@ -651,9 +665,11 @@ namespace Assets.Scripts
     }
 
     /// <summary>
-    /// A safety net behind <see cref="EditorCullingLookupPatch"/>: after a stock rename or delete of a global
-    /// variable, any block that still uses the old name, switched off or not, gets what the stock method does to
-    /// the blocks it found (renamed, or removed). Normally there's none; one is logged. Only while culling is on.
+    /// Before a stock rename or delete of a global variable, the switched-off stacks holding its blocks come on
+    /// (see <see cref="EditorCulling.SwitchOnStacksUsing"/>), so stock code only ever meets active blocks. After
+    /// it, a safety net: any block still using the old name gets what the stock method does to the blocks it
+    /// found (renamed, or removed), with a warning. Blocks the stock method just deleted are skipped: they stay
+    /// until the end of the frame, marked IsDestroyed. Only while culling is on.
     /// </summary>
     [HarmonyPatch]
     public static class EditorCullingVariablePatch
@@ -662,6 +678,21 @@ namespace Assets.Scripts
         {
             yield return AccessTools.Method(typeof(VizzyUIScript), "RenameVariable", new[] { typeof(string), typeof(string) });
             yield return AccessTools.Method(typeof(VizzyUIScript), "DeleteVariable", new[] { typeof(string) });
+        }
+
+        private static void Prefix(VizzyUIScript __instance, object[] __args)
+        {
+            try
+            {
+                if (EditorCulling.ActiveFor(__instance))
+                {
+                    EditorCulling.SwitchOnStacksUsing(__instance, (string)__args[0]);
+                }
+            }
+            catch (Exception e)
+            {
+                EditorLog.Error("Couldn't switch on the stacks using a variable: " + e);
+            }
         }
 
         private static void Postfix(VizzyUIScript __instance, object[] __args, MethodBase __originalMethod)
@@ -675,40 +706,26 @@ namespace Assets.Scripts
 
                 var oldName = (string)__args[0];
                 var rename = __originalMethod.Name == "RenameVariable";
-                var newName = rename ? (string)__args[1] : null;
+                EditorCulling.SwitchOnStacksUsing(__instance, oldName);
                 var missed = 0;
-                var hidden = new List<BlockElementScript>();
                 foreach (var block in __instance.ProgramTransform.GetComponentsInChildren<BlockElementScript>(true))
                 {
-                    if (block == null || !(block.Node is ModApi.Craft.Program.VariableExpression variable) || variable.IsLocal)
+                    if (block == null || block.IsDestroyed || !(block.Node is ModApi.Craft.Program.VariableExpression variable) || variable.IsLocal || variable.VariableName != oldName)
                     {
                         continue;
                     }
 
-                    if (variable.VariableName == oldName)
+                    missed++;
+                    if (rename)
                     {
-                        missed++;
-                        if (rename)
-                        {
-                            variable.VariableName = newName;
-                            block.OnChildSizeChanged();
-                        }
-                        else
-                        {
-                            block.Destroy();
-                            continue;
-                        }
+                        variable.VariableName = (string)__args[1];
+                        block.OnChildSizeChanged();
                     }
-
-                    if (rename && variable.VariableName == newName && EditorCulling.IsCulled(block.transform))
+                    else
                     {
-                        hidden.Add(block);
+                        block.Destroy();
                     }
                 }
-
-                // A switched-off block lays out with its text unmeasured, so it keeps its old width: its stack
-                // comes on to lay out again (see EditorCulling.Relayout).
-                EditorCulling.Relayout(__instance, hidden);
 
                 if (missed > 0)
                 {
@@ -748,35 +765,6 @@ namespace Assets.Scripts
             catch (Exception e)
             {
                 EditorLog.Warning("Editor culling after loading failed: " + e.Message);
-            }
-        }
-    }
-
-    /// <summary>
-    /// With Debug Logging, how long the stock editor takes to save, apply and close, with culling on or off, to
-    /// compare. SaveFlightProgram reads every stack through the program transform's children, switched off or
-    /// not (IL, 2026-11-07), so culling can't lose blocks there.
-    /// </summary>
-    [HarmonyPatch]
-    public static class EditorTimingPatch
-    {
-        private static IEnumerable<MethodBase> TargetMethods()
-        {
-            yield return AccessTools.Method(typeof(VizzyUIScript), "SaveFlightProgram");
-            yield return AccessTools.Method(typeof(VizzyUIScript), "ApplyChangesToCraft");
-            yield return AccessTools.Method(typeof(VizzyUIScript), "Close");
-        }
-
-        private static void Prefix(out System.Diagnostics.Stopwatch __state)
-        {
-            __state = ModSettings.Instance.DebugLogging.Value ? System.Diagnostics.Stopwatch.StartNew() : null;
-        }
-
-        private static void Postfix(System.Diagnostics.Stopwatch __state, MethodBase __originalMethod)
-        {
-            if (__state != null)
-            {
-                EditorLog.Debug("Editor: " + __originalMethod.Name + " took " + __state.ElapsedMilliseconds + " ms, culling " + (ModSettings.Instance.EditorCulling.Value ? "on" : "off") + ".");
             }
         }
     }
