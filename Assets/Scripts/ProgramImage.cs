@@ -346,7 +346,7 @@ namespace Assets.Scripts
 
         private void Prepare(RectTransform program, Rect box, float scale, int width, int height)
         {
-            var folder = Path.Combine(Path.GetDirectoryName(VizzyUIScript.FlightProgramsFolderPath.TrimEnd('/', '\\')), "Program Images");
+            var folder = Path.Combine(Path.GetDirectoryName(VizzyUIScript.FlightProgramsFolderPath.TrimEnd('/', '\\')), "Vizzy Images");
             Directory.CreateDirectory(folder);
             var name = (_controller.VizzyUI as VizzyUIScript)?.FlightProgram?.Name;
             name = string.IsNullOrEmpty(name) ? "Program" : string.Concat(name.Select(ch => Path.GetInvalidFileNameChars().Contains(ch) ? '_' : ch));

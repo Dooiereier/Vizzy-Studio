@@ -27,7 +27,7 @@
    <s id="VizzyStudio.Editor.CleanVariables">清理变量</s>
    <s id="VizzyStudio.Editor.ExportBlockTooltip">先在画布上点击一个块,再点击此处,即可将其复制到另一个已保存的程序.指令会带上其下方的块.</s>
    <s id="VizzyStudio.Editor.ExportBlock">导出块</s>
-   <s id="VizzyStudio.Editor.ExportImageTooltip">将整个程序按块的原始大小导出为一张 PNG,存放在已保存程序旁的 Program Images 文件夹中.</s>
+   <s id="VizzyStudio.Editor.ExportImageTooltip">将整个程序按块的原始大小导出为一张 PNG,存放在已保存程序旁的 Vizzy Images 文件夹中.</s>
    <s id="VizzyStudio.Editor.ExportImage">导出图片</s>
    <s id="VizzyStudio.Image.Saving">正在保存图片… {0} %</s>
    <s id="VizzyStudio.Image.Saved">图片已保存:{0}</s>
