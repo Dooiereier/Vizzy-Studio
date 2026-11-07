@@ -77,4 +77,4 @@ These compile the scripts without Unity and run the offline tests. How it all wo
 
 ## Credits
 
-By Dooiereier and Torifune, with code from Vizzy Debugger and UI textures by QiQi, merged with their agreement.
+By Dooiereier and Torifune, with code from Vizzy Debugger, merged with agreement.

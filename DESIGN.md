@@ -116,7 +116,7 @@ A list under a Funk field while typing: Up and Down choose, Enter takes it, Esc 
 
 ## Merged from Vizzy Debugger
 
-Code by Oxeter and Torifune, UI textures by QiQi, merged with their agreement.
+Code by Oxeter and Torifune, merged with their agreement.
 
 - **Funk coloring and error marks** (`FunkHighlight`): colors and red marks through
   `TMP_Text.OnPreRenderText`. Names come from `FunkNames`, shared with auto-fill.
