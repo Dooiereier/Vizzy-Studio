@@ -193,3 +193,36 @@ The risk is stock code that collects blocks in a way that skips inactive objects
 - **Stepping aside.** If either patch fails at startup, `EditorCulling.Unavailable` keeps culling off everywhere. When an editor opens, Harmony's patch list is read; if another mod patches a method in the `Assets.Scripts.Vizzy` namespaces, culling stays off in that editor, since that code can't be checked. Either way the log says why, once, when the setting is on.
 
 `DragSelection.IdentifyTargetConnectionPoints` only needs what's in view. Measured before stacks were switched off (scripts off plus mask): about 45 ms per frame against 60 on an 18,358-block program.
+
+## Program image (design note, not built)
+
+Saves the whole program as one image at a readable size, from the editor's menu.
+
+**Native mechanism.** The game takes its own pictures by rendering a camera into a `RenderTexture` and reading it back: `ScreenshotDialogScript.TakeScreenShotWithCamera` (`ReadPixels`), `PartViewerScript.TakePicture` and `SavePartPicture` (`EncodeToPNG`) (IL, 2026-11-07). The Vizzy editor itself has no camera to borrow: `VizzyUIScript.Camera` returns null, so its canvas is presumably Screen Space - Overlay (to confirm in the prototype). Zoom and pan are plain transform values: `ProgramContainerScript.Zoom` sets `ProgramTransform.localScale` (clamped to `MinZoom`–`MaxZoom`), and dragging moves `ProgramTransform.localPosition`. So zoom 1 is the blocks' own size, readable as in the editor at 100 %. No Harmony patch is needed.
+
+**How.** One capture at a time, as a coroutine on the editor:
+1. A full-screen blocker with "Saving image… n %" covers the editor (it also stops clicks and drags), and Editor Culling switches everything on and pauses. A frame passes, so blocks never shown get built.
+2. The program's box is measured as Editor Culling does (every block, in the program's own space).
+3. `ProgramTransform` moves for the capture under a capture canvas of our own (Screen Space - Camera, our own camera, its `targetTexture` a `RenderTexture`, far from the scene and rendering only that canvas), at zoom 1, with the editor's background colour behind it. Our canvas sees only the blocks: no toolbox, flyouts or grid.
+4. Tile by tile it's rendered with `Camera.Render()` and read with `ReadPixels`, a band of rows at a time, and the rows are written straight to a PNG file by a small streaming encoder (`DeflateStream`). Memory stays at one band (a 40,000-pixel-wide program: about 60 MB), and the image can be larger than Unity's 16,384-pixel texture limit. A few tiles per frame keep the game responsive and the percentage moving.
+5. `ProgramTransform` goes back to its parent with its own position and scale, culling resumes, and a message gives the file's path.
+
+**Where it lives.** `ProgramImage.cs` (the capture, a MonoBehaviour on the editor like `EditorCulling`) and `PngStreamWriter.cs` (the encoder, with offline tests). A button in the editor's menu next to Block Search and Jump To; no key.
+
+**File.** PNG, in a `Program Images` folder beside the game's flight programs folder (`VizzyUIScript.FlightProgramsFolderPath`), named after the program and the time.
+
+**Choices for the user:**
+- Size: zoom 1 (as the editor at 100 %). Recommended: no limit, but above about 400 megapixels it asks first, and says the size; a smaller scale (0.5) as the alternative.
+- What: the whole program. A later option: only the selected stacks.
+- Background: the editor's plain colour; the grid isn't drawn.
+
+**Lifecycle.**
+- Pause and time warp: irrelevant; the editor runs on unscaled time, and so does the capture.
+- Quicksave and quickload, scene change, craft switching or EVA, the craft or part destroyed: each closes the editor. Closing or `OnDisable` during a capture stops it at once, puts `ProgramTransform` back, deletes the unfinished file and resumes culling.
+- Several editors: one capture at a time; a second click says it's busy.
+- Order: after the stock editor's own `Update` doesn't matter, since editing is blocked during the capture. Funk coloring runs as text renders, so it's in the image.
+- Errors: any exception ends the capture the same way and logs it; the editor is always restored.
+
+**Stock content.** Nothing changes unless the button is used. During a capture the stock objects are only moved and moved back.
+
+**To prove first (a prototype with logging):** the editor canvas's render mode; that a `ProgramTransform` moved under another canvas renders there and keeps working when moved back (selection, drags, culling, Funk coloring); that the stock editor doesn't keep a reference that breaks (for example a cached canvas); and how long a capture of the 18,000-block program takes.
