@@ -22,6 +22,7 @@ namespace Assets.Scripts
         private const string CancelButtonId = "vizzy-studio-cancel";
         private const string CleanButtonId = "vizzy-studio-clean-variables";
         private const string ExportButtonId = "vizzy-studio-export";
+        private const string ImageButtonId = "vizzy-studio-export-image";
 
         /// <summary>Gets or sets a value indicating whether the editor being built is one of this mod's.</summary>
         public static bool BuildingOurEditor { get; set; }
@@ -81,6 +82,14 @@ namespace Assets.Scripts
                 EditorLog.Warning("Couldn't add the block search: " + e);
             }
 
+            request.AddOnLayoutRebuiltAction(controller =>
+            {
+                if (controller is VizzyUIController vizzy && vizzy.GetComponent<EditorCulling>() == null)
+                {
+                    vizzy.gameObject.AddComponent<EditorCulling>().Connect(vizzy);
+                }
+            });
+
             if (BuildingOurEditor)
             {
                 ReplaceApplyAndCancel(request);
@@ -117,6 +126,12 @@ namespace Assets.Scripts
                         new XAttribute("class", "btn"),
                         new XAttribute("tooltip", Text.Get("VizzyStudio.Editor.ExportBlockTooltip")),
                         new XElement(ns + "TextMeshPro", new XAttribute("text", Text.Get("VizzyStudio.Editor.ExportBlock")))));
+                gridRow.Parent.Elements().First(e => (string)e.Attribute("id") == ExportButtonId).AddAfterSelf(
+                    new XElement(ns + "Button",
+                        new XAttribute("id", ImageButtonId),
+                        new XAttribute("class", "btn"),
+                        new XAttribute("tooltip", Text.Get("VizzyStudio.Editor.ExportImageTooltip")),
+                        new XElement(ns + "TextMeshPro", new XAttribute("text", Text.Get("VizzyStudio.Editor.ExportImage")))));
 
                 request.AddOnLayoutRebuiltAction(controller =>
                 {
@@ -132,6 +147,13 @@ namespace Assets.Scripts
                         if (controller is VizzyUIController vizzy)
                         {
                             Exporter.ExportBlock.Run(vizzy.VizzyUI);
+                        }
+                    });
+                    Listen(controller, ImageButtonId, () =>
+                    {
+                        if (controller is VizzyUIController vizzy)
+                        {
+                            ProgramImage.Save(vizzy);
                         }
                     });
                 });

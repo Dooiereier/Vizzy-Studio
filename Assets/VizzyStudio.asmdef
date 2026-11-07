@@ -1,5 +1,5 @@
 {
-	"name": "Vizzy Studio",
+	"name": "VizzyStudio",
 	"references": [
 		"UnityEngine.UI",
 		"Unity.TextMeshPro"

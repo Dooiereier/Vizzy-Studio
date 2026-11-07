@@ -98,8 +98,6 @@ namespace Assets.Scripts.Vizzy
         // textComponent.GetInstanceID() -> its error underline overlay, a child of textComponent
         private static readonly Dictionary<int, TextMeshProUGUI> _errorOverlays = new Dictionary<int, TextMeshProUGUI>();
 
-        private static readonly HashSet<string> _loggedOnce = new HashSet<string>(StringComparer.Ordinal);
-
         // Variable name cache: the current program and a 0.5 s timestamp, to avoid walking the tree every frame
         private static FlightProgram _varCacheFp;
         private static HashSet<string> _varCacheNames;
@@ -134,7 +132,6 @@ namespace Assets.Scripts.Vizzy
         {
             _textToInput.Clear();
             _errorOverlays.Clear();
-            _loggedOnce.Clear();
             _varCacheFp = null;
             _varCacheNames = null;
         }
@@ -149,23 +146,6 @@ namespace Assets.Scripts.Vizzy
             if (block == null)
             {
                 return;
-            }
-            // Diagnostic: the type details of each text input block, comments included, to trace misidentified blocks.
-            try
-            {
-                string parentNode = block.Parent != null && block.Parent.Node != null
-                    ? block.Parent.Node.GetType().Name : "null";
-                LogOnce("[FunkHighlight] Register: block='" + block.name + "' node="
-                    + (block.Node != null ? block.Node.GetType().Name : "null")
-                    + " parentNode=" + parentNode
-                    + " style=" + (block.Style != null ? block.Style.Id : "null")
-                    + " tokenType=" + (block.Token != null ? block.Token.TokenType.ToString() : "null")
-                    + " validation='" + (block.Token != null ? block.Token.Validation : "null") + "'"
-                    + " -> funk=" + IsFunkExpressionBlock(block));
-            }
-            catch (Exception e)
-            {
-                Debug.LogWarning("[FunkHighlight] Register log: " + e.Message);
             }
             if (!IsFunkExpressionBlock(block))
             {
@@ -285,14 +265,8 @@ namespace Assets.Scripts.Vizzy
                 {
                     return;
                 }
-                LogOnce("[FunkHighlight] Upload: tc='" + textComponent.name + "' id=" + textComponent.GetInstanceID()
-                    + " node=" + (block.Node != null ? block.Node.GetType().Name : "?")
-                    + " parent=" + (block.Parent != null && block.Parent.Node != null ? block.Parent.Node.GetType().Name : "?")
-                    + " style=" + (block.Style != null ? block.Style.Id : "?")
-                    + " text='" + input.text + "'");
                 HashSet<string> variableNames = GetVariableNames(block);
                 ApplyMeshColors(input, textComponent, variableNames);
-                LogOnce("[FunkHighlight] PR colored '" + input.text + "' chars=" + textComponent.textInfo.characterCount);
             }
             catch (Exception e)
             {
@@ -312,10 +286,6 @@ namespace Assets.Scripts.Vizzy
             int errStart, errEnd;
             string errMsg;
             bool hasError = FindError(text, out errStart, out errEnd, out errMsg, variableNames);
-            if (hasError)
-            {
-                LogOnce("[FunkHighlight] ERR '" + text + "': " + errMsg + " (pos " + errStart + "-" + errEnd + ")");
-            }
             Color32[] perChar = TokenizeToColors(text, errStart, errEnd);
 
             // Screen range of the visible characters in the error span, for the red underline overlay
@@ -384,11 +354,6 @@ namespace Assets.Scripts.Vizzy
                 int n = Mathf.Clamp(Mathf.RoundToInt(width / approxCharW), 2, 200);
                 overlay.text = new string('~', n);
                 overlay.enabled = true;
-                LogOnce("[FunkHighlight] Overlay: text='" + input.text + "' err=[" + errStart + "," + errEnd
-                    + "] x=[" + errX0.ToString("F1") + "," + errX1.ToString("F1") + "] y=" + errY.ToString("F1")
-                    + " w=" + width.ToString("F1") + " n=" + n
-                    + " pivot=" + textComponent.rectTransform.pivot
-                    + " fontSize=" + textComponent.fontSize.ToString("F1"));
             }
             else
             {
@@ -1147,14 +1112,6 @@ namespace Assets.Scripts.Vizzy
             byte g = Convert.ToByte(hex.Substring(3, 2), 16);
             byte b = Convert.ToByte(hex.Substring(5, 2), 16);
             return new Color32(r, g, b, 255);
-        }
-
-        private static void LogOnce(string msg)
-        {
-            if (ModSettings.Instance.DebugLogging.Value && _loggedOnce.Add(msg))
-            {
-                EditorLog.Debug(msg);
-            }
         }
     }
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Strings>
-   <!-- Vizzy Studio: Simplified Chinese, with the game's own terms. Corrections welcome. -->
+   <!-- VizzyStudio: Simplified Chinese, with the game's own terms. Corrections welcome. -->
    <!-- Flight -->
    <s id="VizzyStudio.Flight.NoMfdProgram">此载具上没有自定义 MFD 程序.</s>
    <s id="VizzyStudio.Flight.NoProgramToRestart">此载具上没有可重启的 Vizzy 程序.</s>
@@ -25,8 +25,14 @@
    <!-- Editor -->
    <s id="VizzyStudio.Editor.CleanVariablesTooltip">询问后删除此程序未使用的全局变量.其他部件的程序或 InputController 仍可能按名称读取它们.</s>
    <s id="VizzyStudio.Editor.CleanVariables">清理变量</s>
-   <s id="VizzyStudio.Editor.ExportBlockTooltip">先在画布上点击一个块,再点击此处,即可将其复制到另一个已保存的程序.指令会带上其下方的块.</s>
+   <s id="VizzyStudio.Editor.ExportBlockTooltip">先点击一个块,再点击这里,即可将它复制到另一个已保存的程序中,连同它下方的块以及它用到的变量、自定义表达式和自定义指令.</s>
    <s id="VizzyStudio.Editor.ExportBlock">导出块</s>
+   <s id="VizzyStudio.Editor.ExportImageTooltip">将整个 Vizzy 画布导出为 PNG 图片.图片保存在 /UserData/FlightPrograms/Vizzy Images.</s>
+   <s id="VizzyStudio.Editor.ExportImage">导出图片</s>
+   <s id="VizzyStudio.Image.Saving">正在保存图片… {0} %</s>
+   <s id="VizzyStudio.Image.Saved">图片已保存:{0}</s>
+   <s id="VizzyStudio.Image.Failed">无法保存图片.详情见日志.</s>
+   <s id="VizzyStudio.Image.Busy">已有图片正在保存.</s>
    <!-- CleanVariables -->
    <s id="VizzyStudio.Clean.FunkBuilt">未删除任何变量:某个 Funk 块的文本由其他块构成.</s>
    <s id="VizzyStudio.Clean.NoneUnused">没有未使用的变量.</s>
@@ -57,11 +63,11 @@
    <s id="VizzyStudio.Export.WriteFailed">无法导出到该文件:{0}</s>
    <s id="VizzyStudio.Export.ReadFailed">无法读取此块:{0}</s>
    <!-- Startup -->
-   <s id="VizzyStudio.Startup.NeedsHarmony">Vizzy Studio 需要 Juno Harmony 模组,因此已被关闭.请安装并启用 Juno Harmony, 然后重启游戏.</s>
-   <s id="VizzyStudio.Startup.ReplacedMods">Vizzy Studio 已包含 {0} 的功能.请移除这些模组,否则两者会作用于同一个编辑器.</s>
-   <s id="VizzyStudio.Startup.HarmonyFailed">Vizzy Studio 无法在当前加载的 Harmony 版本下启动,因此已被关闭.请查看 Player.log.</s>
+   <s id="VizzyStudio.Startup.NeedsHarmony">VizzyStudio 需要 Juno Harmony 模组,因此已被关闭.请安装并启用 Juno Harmony, 然后重启游戏.</s>
+   <s id="VizzyStudio.Startup.ReplacedMods">VizzyStudio 已包含 {0} 的功能.请移除这些模组,否则两者会作用于同一个编辑器.</s>
+   <s id="VizzyStudio.Startup.HarmonyFailed">VizzyStudio 无法在当前加载的 Harmony 版本下启动,因此已被关闭.请查看 Player.log.</s>
    <!-- Update -->
-   <s id="VizzyStudio.Update.Available">Vizzy Studio 有新版本可用.\n\n已安装:{0}\n最新:{1}</s>
+   <s id="VizzyStudio.Update.Available">VizzyStudio 有新版本可用.\n\n已安装:{0}\n最新:{1}</s>
    <s id="VizzyStudio.Update.Open">打开下载页面</s>
    <s id="VizzyStudio.Update.Later">稍后</s>
    <!-- BlockSearch -->
@@ -75,15 +81,6 @@
    <!-- JumpTo -->
    <s id="VizzyStudio.JumpTo.Tooltip">跳转到:将视图移到带标记的块.用以 // 开头的注释标记它们,例如 //发射,或用 //发射/俯仰程序 进行嵌套.</s>
    <s id="VizzyStudio.JumpTo.Title">跳转到</s>
-   <!-- Matrix -->
-   <s id="VizzyStudio.Matrix.Multiply.Format">矩阵相乘 A=(0),B=(1)</s>
-   <s id="VizzyStudio.Matrix.Multiply.Tooltip">3x3 矩阵乘法.两个输入都是按行排列的 9 元素列表 [m00..m22].\n需要 Vizzy Studio 模组</s>
-   <s id="VizzyStudio.Matrix.GetElement.Format">获取矩阵元素 M=(0),行=(1:Number),列=(2:Number)</s>
-   <s id="VizzyStudio.Matrix.GetElement.Tooltip">返回元素 M[行][列]. 行和列从 0 开始.\n需要 Vizzy Studio 模组</s>
-   <s id="VizzyStudio.Matrix.SetElement.Format">设置矩阵元素 M=(0),行=(1:Number),列=(2:Number),值=(3:Number)</s>
-   <s id="VizzyStudio.Matrix.SetElement.Tooltip">返回 M 的副本,其中元素 [行][列] 被替换为值.\n需要 Vizzy Studio 模组</s>
-   <s id="VizzyStudio.Matrix.Normalize.Format">归一化矩阵 M=(0),模式=(1:Number)</s>
-   <s id="VizzyStudio.Matrix.Normalize.Tooltip">模式 0: 归一化列, 1: 归一化行, 2: 按 Frobenius 范数缩放到长度 1.\n需要 Vizzy Studio 模组</s>
    <!-- Mfd -->
    <s id="VizzyStudio.Mfd.RestartQuestion">从头重启 {0} 的 MFD 程序?其控件将被移除,线程和变量将被重置.其他程序继续运行.</s>
    <!-- MfdSave -->
@@ -190,6 +187,7 @@
    <s id="VizzyStudio.Settings.Modifier">编辑器按键修饰键</s>
    <s id="VizzyStudio.Settings.ShowFlightButtons">显示飞行按钮</s>
    <s id="VizzyStudio.Settings.ArrangeMfd">排列 MFD</s>
+   <s id="VizzyStudio.Settings.EditorCulling">编辑器剔除</s>
    <s id="VizzyStudio.Settings.FunkSyntaxHighlight">Funk 语法高亮</s>
    <s id="VizzyStudio.Settings.FunkAutoFill">Funk 自动补全</s>
    <s id="VizzyStudio.Settings.CheckForUpdates.Description">游戏启动时,从 SimpleRockets.com 上的模组页面读取最新版本,如果更新,则询问是否打开该页面.不会自动下载任何内容.</s>
@@ -198,6 +196,7 @@
    <s id="VizzyStudio.Settings.Modifier.Description">与编辑器按键一起按住.</s>
    <s id="VizzyStudio.Settings.ShowFlightButtons.Description">在飞行导航面板上显示一个 Vizzy 按钮,包含重启 Vizzy 和编辑 Vizzy. 从下次飞行起生效.</s>
    <s id="VizzyStudio.Settings.ArrangeMfd.Description">在飞行按钮中添加排列 MFD: 移动,调整大小和旋转自定义 MFD 程序的控件,然后将数值保存到程序中.保存时也会更改载具文件,并先进行备份.从下次飞行起生效.</s>
+   <s id="VizzyStudio.Settings.EditorCulling.Description">暂停远离屏幕的块,大幅提高大型程序中 Vizzy 编辑器的帧率.其他模组修改编辑器时自动关闭.</s>
    <s id="VizzyStudio.Settings.FunkSyntaxHighlight.Description">为 Funk 字段着色,并用红色标出错误,在设计器和飞行中都有效.</s>
    <s id="VizzyStudio.Settings.FunkAutoFill.Description">在 Funk 字段中输入时提示 Funk 名称,在设计器和飞行中都有效.上下键选择,Enter 确认,Esc 关闭列表.</s>
    <s id="VizzyStudio.Settings.Modifier.Alt">Option / Alt</s>

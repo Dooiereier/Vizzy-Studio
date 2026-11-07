@@ -1,4 +1,4 @@
-# Vizzy Studio: design
+# VizzyStudio: design
 
 Pause in flight, open a craft's program in the stock Vizzy editor, change it and apply. The program
 carries on from where it was, so you can repeat quickload, edit, fly to tune things like PID gains.
@@ -10,11 +10,11 @@ carries on from where it was, so you can repeat quickload, edit, fly to tune thi
   Restart Vizzy button, for the selected part's program, after a confirmation.
 - **A quickload keeps the latest applied edit.** Craft state and thread positions come from the
   quicksave; the program is the latest edit. A key returns to the quicksave's program.
-- **Only crafts with a Matrix block need the mod.** No part modifiers; other programs stay ordinary stock XML.
+- **Crafts never need the mod.** No part modifiers; programs stay ordinary stock XML.
 - **Harmony is required**, from the Juno Harmony mod, and never inside the mod file. Without it the mod logs
-  an error, shows one message and stays off. Patches: auto-fill keys, coloring on each Funk field, and the
-  Matrix blocks in the toolbox; each has no public alternative, and each applies on its own.
-- **In the designer**, only auto-fill, coloring, the Matrix blocks, Clean Variables, Export Block, Jump To and
+  an error, shows one message and stays off. Patches: auto-fill keys and coloring on each Funk field; each
+  has no public alternative, and each applies on its own.
+- **In the designer**, only auto-fill, coloring, Clean Variables, Export Block, Jump To and
   reopening at the last view differ from stock.
 - **Other mods stay unaffected.** Only an editor this mod opens gets its Apply and Cancel replaced,
   so another mod that opens the stock editor in flight keeps the stock buttons.
@@ -71,7 +71,7 @@ Known limits:
 - `CraftPrograms`: which programs a craft has. `ProgramSwapper`: puts a program in place.
 - `ThreadRemapper`, `LatestEdits`, `FunkCompletion`: no game code, tested offline.
 - `FunkAutoFill`, `FunkList`, `FunkInputPatch`: auto-fill's game side.
-- `FunkHighlight`, `FlightButtons`, `MatrixBlocks`, `VizzyVariableCleaner`: from Vizzy Debugger.
+- `FunkHighlight`, `FlightButtons`, `VizzyVariableCleaner`: from Vizzy Debugger.
 - `Exporter/`, `VizzyOrganizer/`: from Vizzy Exporter and Vizzy McBlinky.
 
 ## Lifecycle
@@ -116,7 +116,7 @@ A list under a Funk field while typing: Up and Down choose, Enter takes it, Esc 
 
 ## Merged from Vizzy Debugger
 
-Code by Oxeter and Torifune, UI textures by QiQi, merged with their agreement.
+Code by Oxeter and Torifune, merged with their agreement.
 
 - **Funk coloring and error marks** (`FunkHighlight`): colors and red marks through
   `TMP_Text.OnPreRenderText`. Names come from `FunkNames`, shared with auto-fill.
@@ -124,8 +124,6 @@ Code by Oxeter and Torifune, UI textures by QiQi, merged with their agreement.
   opening a flyout styled like the nav sphere's, with Restart Vizzy and Edit Vizzy. Both act on the selected
   part's program straight away, otherwise on the craft's only program or a choice of them. Restart asks first.
   For an MFD it removes the widgets too (`MfdRestart`), as they'd stay and each creation block would log an error. Show Flight Buttons turns them off.
-- **Matrix blocks** (`MatrixBlocks`): registered in the serializer's private tables, and added to the bottom
-  of the toolbox's Operators category by a patch, which is what needs Harmony. `IsModRequiredForCraft` is true only for a craft that uses one.
 - **MFD programs:** custom ones are editable. Stock ones are excluded, because the game reloads them.
 
 Known risk to test: widgets belong to `MfdScript` and survive an Apply, so widgets from deleted blocks can
@@ -181,4 +179,56 @@ Both by Dooiereier. Replace the separate mods, and the mod warns if they're also
 
 ## Languages
 
-Players' text lives in `Assets/Content/Languages/EN-US.xml` (the baseline), `pt.xml` and `zh-Hans.xml`, the languages the game itself ships. The files are Other Assets in `ModData`, so they're packed; at startup `ModManagerScript.LoadModLanguages` installs each `.xml` under a `languages/` path as that language's `Strings_Vizzy Studio.xml`. Code reads them through `Text.Get` (the game's `Locale.GetString`, so the game's language applies and a missing key falls back to English), with `{0}` placeholders and `.One`/`.Many` keys for counts. Settings use `{Key}` names, resolved by the settings screen, and keep their explicit XML names. Matrix block formats and tooltips are keys too: the game's `NodeStyle` reads both through its Locale. Log lines stay English. The offline tests read the English file and check that every key the code names exists, and that each language has every key, no empty text and the same placeholders.
+Players' text lives in `Assets/Content/Languages/EN-US.xml` (the baseline), `pt.xml` and `zh-Hans.xml`, the languages the game itself ships. The files are Other Assets in `ModData`, so they're packed; at startup `ModManagerScript.LoadModLanguages` installs each `.xml` under a `languages/` path as that language's `Strings_VizzyStudio.xml`. Code reads them through `Text.Get` (the game's `Locale.GetString`, so the game's language applies and a missing key falls back to English), with `{0}` placeholders and `.One`/`.Many` keys for counts. Settings use `{Key}` names, resolved by the settings screen, and keep their explicit XML names. Log lines stay English. The offline tests read the English file and check that every key the code names exists, and that each language has every key, no empty text and the same placeholders.
+
+## Starting view after Load
+
+`EditorDefaultView` keeps each editor's starting view (the stock zoom and position, captured just before `EditorViewMemory` or `EditorSession` restores a remembered one). `LoadMenuViewPatch` marks a load from the stock Load menu (`LoadProgramViewModel.OnPrimaryButtonClicked`), and a postfix on `LoadFlightProgram` then puts the view back to that start, unless it's an import (which adds to the program). Undo, Redo and New keep the view.
+
+## Editor culling
+
+`EditorCulling`, on every Vizzy editor, behind the Editor Culling setting (on by default, last in the settings; no longer marked experimental after the rename, Undo, drag and load tests passed, 2026-11-07). The stock editor keeps every block as live UI: each block and text field (`BlockElementScript` and its subclasses) has an `Update`, and Unity lays out and draws them all, on screen or not, as the view (`program-container`) has no mask. So every 0.25 s it switches whole stacks (the program transform's direct children) inactive while their box is more than half a view's width or height outside the view, and active again as they come near, and puts a `RectMask2D` on the view while more of the switched-on blocks lie outside the view than inside it (off again below half). The mask clips every block it covers, so zoomed out, with nearly everything in view, it only cost time: a tester saw about 3 fps fewer than without culling. Boxes are measured every 2 s in the program's own space, so panning and zooming don't need a new measurement. Nothing changes while a mouse button is held, and the stack holding the selected object stays on. A loaded block is created and set up at once (`NodeBuilderScript.CreateBlock` → `Initialize`), but lays out (`Update` → `LayoutElement`, which sets its `Size`) and generates its text only in its first active frame. The game also builds the blocks inside a stack (its expressions) only when the stack is first active: right after a load only about a tenth of the blocks exist. A first version switched far stacks off straight after loading, which kept them unbuilt, but their size wasn't known yet (a block not laid out has no `Size`), so a stack starting well above the view could stay off while its lower part was in view. So culling now waits after connecting and after every load (`EditorCullingLoadPatch`, a postfix on `LoadFlightProgram`, which also logs the load time) until the program is built: the counts of blocks and of blocks without a size unchanged between two measurements, or 30 s. Some blocks never get a size, so waiting for none timed out every time (a capture waited its full 60 s). Stacks with blocks not laid out still get a generous estimated size (2000 units wide, 60 units taller per such block) for stacks that appear later. `EditorTimingPatch` logs how long `SaveFlightProgram`, `ApplyChangesToCraft` and `Close` take, with culling on or off. Measured on an 18,971-block program: the load takes the same with culling on or off (about 1.9 s in `LoadFlightProgram` and 3.5 s of building in the next frames), saving 15 ms and Apply 16 ms either way; only `Close` took 0.14–0.25 s more, from switching every stack back on in `OnDisable`, which it no longer does (the save reads switched-off stacks, and a reopened editor switches them on as they come near). Saving reads the node tree, so it's unaffected.
+
+The risk is stock code that collects blocks in a way that skips inactive objects (`GetComponent(s)InChildren()` without `includeInactive`, `FindObject(s)OfType`) and so misses hidden stacks. Four layers guard against it:
+
+- **Patches.** `EditorCullingLookupPatch`, a transpiler, replaces each `GetComponentsInChildren<T>()` in the stock methods that do this over the whole program with one that also returns blocks in switched-off stacks (other inactive objects are still skipped, so with culling off the result is stock): `VizzyUIScript.GetVariableElements` (behind `RenameVariable` and `DeleteVariable`, so also Clean Variables), `CanDeleteSelection` (at every drag's end; finds calls of a custom instruction being deleted), and `LoadFlightProgram(XElement, bool, bool, Vector2)`, which destroys the old program's blocks before loading a new one (Load, Import, New, Undo and Redo; without it hidden stacks stayed behind). A first version switched every stack on before these instead, which built every block not yet built: freezes of seconds on an 18,000-block program, at every drag. A block's node is set when it's created (`NodeBuilderScript.CreateBlock` → `Initialize`), so a block never switched on is found and renamed too; `OnChildSizeChanged` only queues a layout, done when it's on again. If a method no longer has the call, the patch fails, and culling stays off.
+- **The list.** `tools/check_editor_lookups.py` finds every method in the `Assets.Scripts.Vizzy` namespaces that makes such a lookup and checks it against `tools/editor_lookups.txt`, where each one is marked patched or harmless with the reason (most look inside one block, a dropdown or a flyout). It fails on a method that isn't listed, so it's run after every Juno update. It only sees direct calls in those namespaces, not a helper elsewhere that does the lookup.
+- **Safety net.** `EditorCullingVariablePatch`, a postfix on `RenameVariable` and `DeleteVariable`, looks through every block, switched off or not, for a global variable block still using the old name, and does to it what the stock method does to the blocks it found (sets `VariableName` and calls `OnChildSizeChanged`, or `Destroy`), with a warning in the log. Normally there's none. Only while culling is on.
+- **Stepping aside.** If either patch fails at startup, `EditorCulling.Unavailable` keeps culling off everywhere. When an editor opens, Harmony's patch list is read; if another mod patches a method in the `Assets.Scripts.Vizzy` namespaces, culling stays off in that editor, since that code can't be checked. Either way the log says why, once, when the setting is on.
+
+`DragSelection.IdentifyTargetConnectionPoints` only needs what's in view. Measured before stacks were switched off (scripts off plus mask): about 45 ms per frame against 60 on an 18,358-block program.
+
+## Program image (design note, not built)
+
+Saves the whole program as one image at a readable size, from the editor's menu.
+
+**Native mechanism.** The game takes its own pictures by rendering a camera into a `RenderTexture` and reading it back: `ScreenshotDialogScript.TakeScreenShotWithCamera` (`ReadPixels`), `PartViewerScript.TakePicture` and `SavePartPicture` (`EncodeToPNG`) (IL, 2026-11-07). The Vizzy editor itself has no camera to borrow: `VizzyUIScript.Camera` returns null, so its canvas is presumably Screen Space - Overlay (to confirm in the prototype). Zoom and pan are plain transform values: `ProgramContainerScript.Zoom` sets `ProgramTransform.localScale` (clamped to `MinZoom`–`MaxZoom`), and dragging moves `ProgramTransform.localPosition`. So zoom 1 is the blocks' own size, readable as in the editor at 100 %. No Harmony patch is needed.
+
+**How.** One capture at a time, as a coroutine on the editor:
+1. A full-screen blocker with "Saving image… n %" covers the editor (it also stops clicks and drags), and Editor Culling switches everything on and pauses. A frame passes, so blocks never shown get built.
+2. The program's box is measured as Editor Culling does (every block, in the program's own space).
+3. `ProgramTransform` moves for the capture under a capture canvas of our own (Screen Space - Camera, our own camera, its `targetTexture` a `RenderTexture`, far from the scene and rendering only that canvas), at zoom 1, with the editor's background colour behind it. Our canvas sees only the blocks: no toolbox, flyouts or grid.
+4. Tile by tile it's rendered with `Camera.Render()` and read with `ReadPixels`, a band of rows at a time, and the rows are written straight to a PNG file by a small streaming encoder (`DeflateStream`). Memory stays at one band (a 40,000-pixel-wide program: about 60 MB), and the image can be larger than Unity's 16,384-pixel texture limit. A few tiles per frame keep the game responsive and the percentage moving.
+5. `ProgramTransform` goes back to its parent with its own position and scale, culling resumes, and a message gives the file's path.
+
+**Where it lives.** `ProgramImage.cs` (the capture, a MonoBehaviour on the editor like `EditorCulling`) and `PngStreamWriter.cs` (the encoder, with offline tests). A button in the editor's menu next to Block Search and Jump To; no key.
+
+**File.** PNG, in a `Vizzy Images` folder inside the game's flight programs folder (`VizzyUIScript.FlightProgramsFolderPath`; the stock Load menu lists only that folder's files), named after the program and the time.
+
+**Built (prototype), as measured:** the editor canvas is Screen Space - Overlay (scale factor 1.111), and moving the program onto our world-space canvas renders it correctly. Rendering 400 megapixels took about 2.5 s of 13–16 s; the rest was building every block and encoding on the main thread. So the capture now waits until building stops (as culling does), and encodes on a background thread with two band buffers, the main thread rendering one band while the other is written. The PNG uses deflate's strongest level. Images are always 256 colours (a setting for full colour was dropped: the file is about three times smaller, 11 MB against 37 MB, with text still sharp): a first pass renders everything to count colours (`PaletteQuantizer`: a 64-level cube; the 64 most common cells keep their exact average colour, the rest by median cut and a few k-means rounds, no dithering), and the second writes an indexed PNG (`PngStreamWriter` with a `PLTE` chunk), about twice the rendering for a much smaller file. The log gives the time for building, rendering and waiting for the encoder.
+
+**Choices for the user:**
+- Size: zoom 1 (as the editor at 100 %). Recommended: no limit, but above about 400 megapixels it asks first, and says the size; a smaller scale (0.5) as the alternative.
+- What: the whole program. A later option: only the selected stacks.
+- Background: the editor's plain colour; the grid isn't drawn.
+
+**Lifecycle.**
+- Pause and time warp: irrelevant; the editor runs on unscaled time, and so does the capture.
+- Quicksave and quickload, scene change, craft switching or EVA, the craft or part destroyed: each closes the editor. Closing or `OnDisable` during a capture stops it at once, puts `ProgramTransform` back, deletes the unfinished file and resumes culling.
+- Several editors: one capture at a time; a second click says it's busy.
+- Order: after the stock editor's own `Update` doesn't matter, since editing is blocked during the capture. Funk coloring runs as text renders, so it's in the image.
+- Errors: any exception ends the capture the same way and logs it; the editor is always restored.
+
+**Stock content.** Nothing changes unless the button is used. During a capture the stock objects are only moved and moved back.
+
+**To prove first (a prototype with logging):** the editor canvas's render mode; that a `ProgramTransform` moved under another canvas renders there and keeps working when moved back (selection, drags, culling, Funk coloring); that the stock editor doesn't keep a reference that breaks (for example a cached canvas); and how long a capture of the 18,000-block program takes.

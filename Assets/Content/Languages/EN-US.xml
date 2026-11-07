@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Strings>
-   <!-- Vizzy Studio: English, the baseline every key starts in. -->
+   <!-- VizzyStudio: English, the baseline every key starts in. -->
    <!-- Flight -->
    <s id="VizzyStudio.Flight.NoMfdProgram">No custom MFD program on this craft.</s>
    <s id="VizzyStudio.Flight.NoProgramToRestart">No Vizzy program to restart on this craft.</s>
@@ -25,8 +25,14 @@
    <!-- Editor -->
    <s id="VizzyStudio.Editor.CleanVariablesTooltip">Removes global variables this program doesn't use, after asking. Another part's program or an InputController could still read them by name.</s>
    <s id="VizzyStudio.Editor.CleanVariables">CLEAN VARIABLES</s>
-   <s id="VizzyStudio.Editor.ExportBlockTooltip">Click a block on the canvas, then this, to copy it to another saved program. An instruction brings the blocks below it.</s>
+   <s id="VizzyStudio.Editor.ExportBlockTooltip">Click a block, then this, to copy it to another saved program, with the blocks below it and the variables, custom expressions and custom instructions it uses.</s>
    <s id="VizzyStudio.Editor.ExportBlock">EXPORT BLOCK</s>
+   <s id="VizzyStudio.Editor.ExportImageTooltip">Exports the whole Vizzy canvas as a PNG image. Images can be found at /UserData/FlightPrograms/Vizzy Images.</s>
+   <s id="VizzyStudio.Editor.ExportImage">EXPORT IMAGE</s>
+   <s id="VizzyStudio.Image.Saving">Saving image… {0} %</s>
+   <s id="VizzyStudio.Image.Saved">Image saved: {0}</s>
+   <s id="VizzyStudio.Image.Failed">Couldn't save the image. The log has the details.</s>
+   <s id="VizzyStudio.Image.Busy">An image is already being saved.</s>
    <!-- CleanVariables -->
    <s id="VizzyStudio.Clean.FunkBuilt">No variables removed: a Funk block's text is built by other blocks.</s>
    <s id="VizzyStudio.Clean.NoneUnused">No unused variables.</s>
@@ -57,11 +63,11 @@
    <s id="VizzyStudio.Export.WriteFailed">Couldn't export into that file: {0}</s>
    <s id="VizzyStudio.Export.ReadFailed">Couldn't read this block: {0}</s>
    <!-- Startup -->
-   <s id="VizzyStudio.Startup.NeedsHarmony">Vizzy Studio needs the Juno Harmony mod, so it is switched off. Install and enable Juno Harmony, then restart the game.</s>
-   <s id="VizzyStudio.Startup.ReplacedMods">Vizzy Studio includes the features of {0}. Remove those mods, or both will act on the same editor.</s>
-   <s id="VizzyStudio.Startup.HarmonyFailed">Vizzy Studio couldn't start with the Harmony version that's loaded, so it is switched off. See Player.log.</s>
+   <s id="VizzyStudio.Startup.NeedsHarmony">VizzyStudio needs the Juno Harmony mod, so it is switched off. Install and enable Juno Harmony, then restart the game.</s>
+   <s id="VizzyStudio.Startup.ReplacedMods">VizzyStudio includes the features of {0}. Remove those mods, or both will act on the same editor.</s>
+   <s id="VizzyStudio.Startup.HarmonyFailed">VizzyStudio couldn't start with the Harmony version that's loaded, so it is switched off. See Player.log.</s>
    <!-- Update -->
-   <s id="VizzyStudio.Update.Available">A new version of Vizzy Studio is available.\n\nInstalled: {0}\nLatest: {1}</s>
+   <s id="VizzyStudio.Update.Available">A new version of VizzyStudio is available.\n\nInstalled: {0}\nLatest: {1}</s>
    <s id="VizzyStudio.Update.Open">OPEN DOWNLOAD PAGE</s>
    <s id="VizzyStudio.Update.Later">LATER</s>
    <!-- BlockSearch -->
@@ -75,15 +81,6 @@
    <!-- JumpTo -->
    <s id="VizzyStudio.JumpTo.Tooltip">Jump To: moves the view to tagged blocks. Tag them with a comment starting with //, such as //Launch, or //Launch/Pitch Program to nest it.</s>
    <s id="VizzyStudio.JumpTo.Title">JUMP TO</s>
-   <!-- Matrix -->
-   <s id="VizzyStudio.Matrix.Multiply.Format">Matrix Multiply A=(0), B=(1)</s>
-   <s id="VizzyStudio.Matrix.Multiply.Tooltip">3x3 matrix multiplication. Both inputs are 9-element row-major lists [m00..m22].\nVizzy Studio mod required</s>
-   <s id="VizzyStudio.Matrix.GetElement.Format">Get Matrix Element M=(0), Row=(1:Number), Col=(2:Number)</s>
-   <s id="VizzyStudio.Matrix.GetElement.Tooltip">Returns element M[row][col]. Row and col are 0-based.\nVizzy Studio mod required</s>
-   <s id="VizzyStudio.Matrix.SetElement.Format">Set Matrix Element M=(0), Row=(1:Number), Col=(2:Number), Value=(3:Number)</s>
-   <s id="VizzyStudio.Matrix.SetElement.Tooltip">Returns a copy of M with element [row][col] replaced by Value.\nVizzy Studio mod required</s>
-   <s id="VizzyStudio.Matrix.Normalize.Format">Normalize Matrix M=(0), Mode=(1:Number)</s>
-   <s id="VizzyStudio.Matrix.Normalize.Tooltip">Mode 0: normalize columns, 1: normalize rows, 2: Frobenius scale to length 1.\nVizzy Studio mod required</s>
    <!-- Mfd -->
    <s id="VizzyStudio.Mfd.RestartQuestion">Restart {0}'s MFD program from the top? Its widgets are removed and its threads and variables reset. Other programs keep running.</s>
    <!-- MfdSave -->
@@ -190,6 +187,7 @@
    <s id="VizzyStudio.Settings.Modifier">Editor Key Modifier</s>
    <s id="VizzyStudio.Settings.ShowFlightButtons">Show Flight Buttons</s>
    <s id="VizzyStudio.Settings.ArrangeMfd">Arrange MFD</s>
+   <s id="VizzyStudio.Settings.EditorCulling">Editor Culling</s>
    <s id="VizzyStudio.Settings.FunkSyntaxHighlight">Funk Syntax Highlight</s>
    <s id="VizzyStudio.Settings.FunkAutoFill">Funk Auto-Fill</s>
    <s id="VizzyStudio.Settings.CheckForUpdates.Description">At game start, reads the latest version from the mod's SimpleRockets.com page and, if it's newer, offers to open the page. Nothing is downloaded automatically.</s>
@@ -198,6 +196,7 @@
    <s id="VizzyStudio.Settings.Modifier.Description">Held with the editor key.</s>
    <s id="VizzyStudio.Settings.ShowFlightButtons.Description">Shows a Vizzy button on the flight nav panel, with Restart Vizzy and Edit Vizzy. Applies from the next flight.</s>
    <s id="VizzyStudio.Settings.ArrangeMfd.Description">Adds Arrange MFD to the flight buttons: move, resize and rotate the widgets of a custom MFD program, then save the values into the program. Saving also changes the craft's files, after backing them up. Applies from the next flight.</s>
+   <s id="VizzyStudio.Settings.EditorCulling.Description">Greatly increases the Vizzy editor's frame rate in large programs by pausing blocks far off screen. Off when another mod changes the editor.</s>
    <s id="VizzyStudio.Settings.FunkSyntaxHighlight.Description">Colors Funk fields and marks errors in red, in the designer and in flight.</s>
    <s id="VizzyStudio.Settings.FunkAutoFill.Description">Suggests Funk names while typing in a Funk field, in the designer and in flight. Up and Down choose, Enter takes it, Esc closes the list.</s>
    <s id="VizzyStudio.Settings.Modifier.Alt">Option / Alt</s>

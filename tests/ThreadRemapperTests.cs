@@ -49,6 +49,8 @@ public static class ThreadRemapperTests
         ModPageVersionTests.Run(Check);
         BlockSearchTests.Run(Check);
         BlockPlacementTests.Run(Check);
+        PngStreamWriterTests.Run(Check);
+        PaletteQuantizerTests.Run(Check);
         MfdFormulaWriterTests.Run(Check);
 
         Console.WriteLine($"{_passed} passed, {_failed} failed.");

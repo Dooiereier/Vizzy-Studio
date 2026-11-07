@@ -75,12 +75,12 @@ namespace Assets.Scripts
         Shift,
     }
 
-    /// <summary>The mod's settings (Settings → Mods → Vizzy Studio).</summary>
+    /// <summary>The mod's settings (Settings → Mods → VizzyStudio).</summary>
     public class ModSettings : SettingsCategory<ModSettings>
     {
         private static ModSettings _instance;
 
-        public ModSettings() : base("Vizzy Studio")
+        public ModSettings() : base("VizzyStudio")
         {
         }
 
@@ -97,6 +97,8 @@ namespace Assets.Scripts
         public BoolSetting CheckForUpdates { get; private set; }
 
         public BoolSetting ArrangeMfd { get; private set; }
+
+        public BoolSetting EditorCulling { get; private set; }
 
         public BoolSetting FunkAutoFill { get; private set; }
 
@@ -175,6 +177,10 @@ namespace Assets.Scripts
 
             this.FunkAutoFill = this.CreateBool("{VizzyStudio.Settings.FunkAutoFill}", "FunkAutoFill")
                 .SetDescription("{VizzyStudio.Settings.FunkAutoFill.Description}")
+                .SetDefault(true);
+
+            this.EditorCulling = this.CreateBool("{VizzyStudio.Settings.EditorCulling}", "EditorCulling")
+                .SetDescription("{VizzyStudio.Settings.EditorCulling.Description}")
                 .SetDefault(true);
         }
     }
