@@ -188,7 +188,6 @@
    <s id="VizzyStudio.Settings.ShowFlightButtons">Mostrar Botões de Voo</s>
    <s id="VizzyStudio.Settings.ArrangeMfd">Organizar MFD</s>
    <s id="VizzyStudio.Settings.EditorCulling">Ocultação no Editor (Experimental)</s>
-   <s id="VizzyStudio.Settings.ImageColours">Cores da Imagem do Programa</s>
    <s id="VizzyStudio.Settings.FunkSyntaxHighlight">Realce de Sintaxe Funk</s>
    <s id="VizzyStudio.Settings.FunkAutoFill">Preenchimento Automático Funk</s>
    <s id="VizzyStudio.Settings.CheckForUpdates.Description">Ao iniciar o jogo, lê a versão mais recente na página do mod em SimpleRockets.com e, se for mais nova, oferece-se para abrir a página. Nada é transferido automaticamente.</s>
@@ -197,8 +196,7 @@
    <s id="VizzyStudio.Settings.Modifier.Description">Mantida premida com a tecla do editor.</s>
    <s id="VizzyStudio.Settings.ShowFlightButtons.Description">Mostra um botão Vizzy no painel de navegação de voo, com Reiniciar Vizzy e Editar Vizzy. Aplica-se a partir do próximo voo.</s>
    <s id="VizzyStudio.Settings.ArrangeMfd.Description">Adiciona Organizar MFD aos botões de voo: move, redimensiona e roda os widgets de um programa de MFD personalizado e depois guarda os valores no programa. Guardar também altera os ficheiros do veículo, depois de fazer cópias de segurança. Aplica-se a partir do próximo voo.</s>
-   <s id="VizzyStudio.Settings.EditorCulling.Description">Pausa o trabalho de cada fotograma dos blocos Vizzy muito fora da vista, o que torna programas grandes mais leves de editar. Os blocos têm o mesmo aspeto e voltam a ligar-se quando se aproximam. Fica desligada quando outro mod altera o editor Vizzy.</s>
-   <s id="VizzyStudio.Settings.ImageColours.Description">As cores de GUARDAR IMAGEM: 256 cores dão um ficheiro muito mais pequeno, com o texto nítido; cor completa mantém todos os tons.</s>
+   <s id="VizzyStudio.Settings.EditorCulling.Description">Aumenta muito a fluidez do editor Vizzy em programas grandes, pausando os blocos longe do ecrã. Desliga-se quando outro mod altera o editor.</s>
    <s id="VizzyStudio.Settings.FunkSyntaxHighlight.Description">Colore os campos Funk e marca os erros a vermelho, no editor e em voo.</s>
    <s id="VizzyStudio.Settings.FunkAutoFill.Description">Sugere nomes Funk enquanto escreves num campo Funk, no editor e em voo. Cima e Baixo escolhem, Enter aceita, Esc fecha a lista.</s>
    <s id="VizzyStudio.Settings.Modifier.Alt">Option / Alt</s>
@@ -207,8 +205,4 @@
    <s id="VizzyStudio.Settings.Modifier.Control.Description">Também baixa o acelerador.</s>
    <s id="VizzyStudio.Settings.Modifier.Shift">Shift</s>
    <s id="VizzyStudio.Settings.Modifier.Shift.Description">Também sobe o acelerador.</s>
-   <s id="VizzyStudio.Settings.ImageColours.Palette">256 Cores</s>
-   <s id="VizzyStudio.Settings.ImageColours.Palette.Description">Um ficheiro muito mais pequeno; o texto fica nítido.</s>
-   <s id="VizzyStudio.Settings.ImageColours.Full">Cor Completa</s>
-   <s id="VizzyStudio.Settings.ImageColours.Full.Description">Todos os tons, um ficheiro maior.</s>
 </Strings>

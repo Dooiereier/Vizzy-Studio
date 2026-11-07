@@ -188,7 +188,6 @@
    <s id="VizzyStudio.Settings.ShowFlightButtons">显示飞行按钮</s>
    <s id="VizzyStudio.Settings.ArrangeMfd">排列 MFD</s>
    <s id="VizzyStudio.Settings.EditorCulling">编辑器剔除 (实验性)</s>
-   <s id="VizzyStudio.Settings.ImageColours">程序图片颜色</s>
    <s id="VizzyStudio.Settings.FunkSyntaxHighlight">Funk 语法高亮</s>
    <s id="VizzyStudio.Settings.FunkAutoFill">Funk 自动补全</s>
    <s id="VizzyStudio.Settings.CheckForUpdates.Description">游戏启动时,从 SimpleRockets.com 上的模组页面读取最新版本,如果更新,则询问是否打开该页面.不会自动下载任何内容.</s>
@@ -197,8 +196,7 @@
    <s id="VizzyStudio.Settings.Modifier.Description">与编辑器按键一起按住.</s>
    <s id="VizzyStudio.Settings.ShowFlightButtons.Description">在飞行导航面板上显示一个 Vizzy 按钮,包含重启 Vizzy 和编辑 Vizzy. 从下次飞行起生效.</s>
    <s id="VizzyStudio.Settings.ArrangeMfd.Description">在飞行按钮中添加排列 MFD: 移动,调整大小和旋转自定义 MFD 程序的控件,然后将数值保存到程序中.保存时也会更改载具文件,并先进行备份.从下次飞行起生效.</s>
-   <s id="VizzyStudio.Settings.EditorCulling.Description">暂停远离视图的 Vizzy 块的每帧处理,让大型程序编辑起来更流畅.块的外观不变,接近视图时会重新启用.当其他模组修改 Vizzy 编辑器时保持关闭.</s>
-   <s id="VizzyStudio.Settings.ImageColours.Description">保存图片的颜色:256 色让文件小得多,文字依然清晰;全彩保留所有色调.</s>
+   <s id="VizzyStudio.Settings.EditorCulling.Description">暂停远离屏幕的块,大幅提高大型程序中 Vizzy 编辑器的帧率.其他模组修改编辑器时自动关闭.</s>
    <s id="VizzyStudio.Settings.FunkSyntaxHighlight.Description">为 Funk 字段着色,并用红色标出错误,在设计器和飞行中都有效.</s>
    <s id="VizzyStudio.Settings.FunkAutoFill.Description">在 Funk 字段中输入时提示 Funk 名称,在设计器和飞行中都有效.上下键选择,Enter 确认,Esc 关闭列表.</s>
    <s id="VizzyStudio.Settings.Modifier.Alt">Option / Alt</s>
@@ -207,8 +205,4 @@
    <s id="VizzyStudio.Settings.Modifier.Control.Description">同时会降低节流阀.</s>
    <s id="VizzyStudio.Settings.Modifier.Shift">Shift</s>
    <s id="VizzyStudio.Settings.Modifier.Shift.Description">同时会提高节流阀.</s>
-   <s id="VizzyStudio.Settings.ImageColours.Palette">256 色</s>
-   <s id="VizzyStudio.Settings.ImageColours.Palette.Description">文件小得多;文字依然清晰.</s>
-   <s id="VizzyStudio.Settings.ImageColours.Full">全彩</s>
-   <s id="VizzyStudio.Settings.ImageColours.Full.Description">保留所有色调,文件更大.</s>
 </Strings>

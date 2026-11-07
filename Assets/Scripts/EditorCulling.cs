@@ -353,6 +353,44 @@ namespace Assets.Scripts
             _nextRefresh = 0f;
         }
 
+        /// <summary>
+        /// Blocks changed while their stack was switched off, such as renamed variables: they laid out without
+        /// their text being measured (TextMeshPro doesn't update while inactive), so they keep their old width.
+        /// Their stacks come on, the blocks lay out again in their next frame, and culling holds off for a moment.
+        /// </summary>
+        public static void Relayout(object vizzyUI, List<BlockElementScript> blocks)
+        {
+            if (blocks == null || blocks.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var culling in Instances)
+            {
+                if (culling == null || culling._controller == null || !ReferenceEquals(culling._controller.VizzyUI, vizzyUI))
+                {
+                    continue;
+                }
+
+                foreach (var block in blocks)
+                {
+                    for (var t = block.transform; t != null; t = t.parent)
+                    {
+                        if (culling._off.Remove(t))
+                        {
+                            Off.Remove(t);
+                            t.gameObject.SetActive(true);
+                            break;
+                        }
+                    }
+
+                    block.OnChildSizeChanged();
+                }
+
+                culling._nextCheck = Time.unscaledTime + 1f;
+            }
+        }
+
         /// <summary>After a stock program load: the editor's first pass, and with Debug Logging the time.</summary>
         public static void AfterLoad(object vizzyUI, long milliseconds)
         {
@@ -630,25 +668,40 @@ namespace Assets.Scripts
 
                 var oldName = (string)__args[0];
                 var rename = __originalMethod.Name == "RenameVariable";
+                var newName = rename ? (string)__args[1] : null;
                 var missed = 0;
+                var hidden = new List<BlockElementScript>();
                 foreach (var block in __instance.ProgramTransform.GetComponentsInChildren<BlockElementScript>(true))
                 {
-                    if (block == null || !(block.Node is ModApi.Craft.Program.VariableExpression variable) || variable.IsLocal || variable.VariableName != oldName)
+                    if (block == null || !(block.Node is ModApi.Craft.Program.VariableExpression variable) || variable.IsLocal)
                     {
                         continue;
                     }
 
-                    missed++;
-                    if (rename)
+                    if (variable.VariableName == oldName)
                     {
-                        variable.VariableName = (string)__args[1];
-                        block.OnChildSizeChanged();
+                        missed++;
+                        if (rename)
+                        {
+                            variable.VariableName = newName;
+                            block.OnChildSizeChanged();
+                        }
+                        else
+                        {
+                            block.Destroy();
+                            continue;
+                        }
                     }
-                    else
+
+                    if (rename && variable.VariableName == newName && EditorCulling.IsCulled(block.transform))
                     {
-                        block.Destroy();
+                        hidden.Add(block);
                     }
                 }
+
+                // A switched-off block lays out with its text unmeasured, so it keeps its old width: its stack
+                // comes on to lay out again (see EditorCulling.Relayout).
+                EditorCulling.Relayout(__instance, hidden);
 
                 if (missed > 0)
                 {
@@ -663,8 +716,8 @@ namespace Assets.Scripts
     }
 
     /// <summary>
-    /// Times the stock program load and, right after it, runs the editor's first culling pass, before the new
-    /// blocks get their first frame (and lay out). Losing it only loses that head start.
+    /// Times the stock program load, and has culling wait until the newly loaded program is built (see
+    /// <see cref="EditorCulling.Hold"/>). Without it, culling would measure stacks before they're laid out.
     /// </summary>
     [HarmonyPatch]
     public static class EditorCullingLoadPatch

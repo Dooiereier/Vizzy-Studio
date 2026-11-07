@@ -136,7 +136,8 @@ namespace Assets.Scripts
                 yield break;
             }
 
-            var palette = ModSettings.Instance.ImageColours.Value == ImageColours.Palette;
+            // Always 256 colours: a much smaller file, with text still sharp.
+            const bool palette = true;
             var columns = (width + TileWidth - 1) / TileWidth;
             var bands = (height + TileHeight - 1) / TileHeight;
             var steps = bands * columns * (palette ? 2 : 1);
