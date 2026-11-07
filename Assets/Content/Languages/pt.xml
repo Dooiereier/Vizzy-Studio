@@ -27,6 +27,12 @@
    <s id="VizzyStudio.Editor.CleanVariables">LIMPAR VARIÁVEIS</s>
    <s id="VizzyStudio.Editor.ExportBlockTooltip">Clica num bloco na área de trabalho e depois aqui para o copiar para outro programa guardado. Uma instrução leva os blocos abaixo dela.</s>
    <s id="VizzyStudio.Editor.ExportBlock">EXPORTAR BLOCO</s>
+   <s id="VizzyStudio.Editor.SaveImageTooltip">Guarda o programa inteiro como um PNG ao tamanho dos blocos, na pasta Program Images ao lado dos programas guardados.</s>
+   <s id="VizzyStudio.Editor.SaveImage">GUARDAR IMAGEM</s>
+   <s id="VizzyStudio.Image.Saving">A guardar a imagem… {0} %</s>
+   <s id="VizzyStudio.Image.Saved">Imagem guardada: {0}</s>
+   <s id="VizzyStudio.Image.Failed">Não foi possível guardar a imagem. O registo tem os detalhes.</s>
+   <s id="VizzyStudio.Image.Busy">Já está a ser guardada uma imagem.</s>
    <!-- CleanVariables -->
    <s id="VizzyStudio.Clean.FunkBuilt">Nenhuma variável removida: o texto de um bloco Funk é construído por outros blocos.</s>
    <s id="VizzyStudio.Clean.NoneUnused">Não há variáveis sem uso.</s>

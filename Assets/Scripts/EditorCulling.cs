@@ -63,6 +63,9 @@ namespace Assets.Scripts
         private int _frames;
         private float _frameTime;
 
+        /// <summary>While true, everything stays switched on and unmasked, such as while the program is saved as an image.</summary>
+        public bool Paused { get; set; }
+
         public void Connect(VizzyUIController controller)
         {
             _controller = controller;
@@ -174,6 +177,13 @@ namespace Assets.Scripts
             try
             {
                 this.LogFrameTime();
+                if (this.Paused)
+                {
+                    this.RestoreAll();
+                    this.SetMask(false);
+                    return;
+                }
+
                 var culling = ModSettings.Instance.EditorCulling.Value;
                 if (culling && _blocked != null)
                 {
