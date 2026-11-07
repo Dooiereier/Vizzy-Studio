@@ -1,15 +1,15 @@
-# Vizzy Studio
+# VizzyStudio
 
 A mod for [Juno: New Origins](https://www.simplerockets.com/) that lets you edit a running craft's Vizzy program in flight, in the game's own editor, without restarting the program.
 
 Pause, change a PID gain, apply, and the program carries on from where it was. Quickload and the latest edit is still there, with threads back at their quicksave positions, so you can tune the same phase of flight over and over.
 
-Vizzy Studio is still in development and has no release yet. It also includes the features of Vizzy Debugger, Vizzy Exporter and Vizzy McBlinky, so turn those mods off when using it.
+VizzyStudio is still in development and has no release yet. It also includes the features of Vizzy Debugger, Vizzy Exporter and Vizzy McBlinky, so turn those mods off when using it.
 
 ## Requirements
 
 - Juno: New Origins, tested on 1.4.105 and 1.4.201
-- The **Juno Harmony** mod. Without it, Vizzy Studio stays off and tells you why.
+- The **Juno Harmony** mod. Without it, VizzyStudio stays off and tells you why.
 
 Crafts never need the mod: their programs stay ordinary Vizzy.
 
@@ -77,4 +77,4 @@ These compile the scripts without Unity and run the offline tests. How it all wo
 
 ## Credits
 
-By Dooiereier, with code by Oxeter and Torifune from Vizzy Debugger and UI textures by QiQi, merged with their agreement.
+By Dooiereier and Torifune, with code from Vizzy Debugger and UI textures by QiQi, merged with their agreement.

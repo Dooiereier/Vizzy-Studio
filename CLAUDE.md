@@ -1,4 +1,4 @@
-# Vizzy Studio
+# VizzyStudio
 
 A Juno: New Origins mod: edit a running craft's Vizzy program in the stock editor in flight, and
 continue from where it was. Design: `DESIGN.md`.
@@ -19,7 +19,7 @@ facts in its `reference/juno-facts.md`.
 
 ## Working here
 
-- Unity 2022.3.62f3. Mod name "Vizzy Studio"; the root asmdef has the same name.
+- Unity 2022.3.62f3. Mod name "VizzyStudio"; the root asmdef has the same name.
 - Commit as `Dooiereier <323592728+Dooiereier@users.noreply.github.com>`. One branch per phase or
   feature; merge to `main` only after the user has tested in the game.
 - `python3 tools/compile_check.py <a Juno project's .csproj>` compiles the scripts

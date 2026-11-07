@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Strings>
-   <!-- Vizzy Studio: Simplified Chinese, with the game's own terms. Corrections welcome. -->
+   <!-- VizzyStudio: Simplified Chinese, with the game's own terms. Corrections welcome. -->
    <!-- Flight -->
    <s id="VizzyStudio.Flight.NoMfdProgram">此载具上没有自定义 MFD 程序.</s>
    <s id="VizzyStudio.Flight.NoProgramToRestart">此载具上没有可重启的 Vizzy 程序.</s>
@@ -63,11 +63,11 @@
    <s id="VizzyStudio.Export.WriteFailed">无法导出到该文件:{0}</s>
    <s id="VizzyStudio.Export.ReadFailed">无法读取此块:{0}</s>
    <!-- Startup -->
-   <s id="VizzyStudio.Startup.NeedsHarmony">Vizzy Studio 需要 Juno Harmony 模组,因此已被关闭.请安装并启用 Juno Harmony, 然后重启游戏.</s>
-   <s id="VizzyStudio.Startup.ReplacedMods">Vizzy Studio 已包含 {0} 的功能.请移除这些模组,否则两者会作用于同一个编辑器.</s>
-   <s id="VizzyStudio.Startup.HarmonyFailed">Vizzy Studio 无法在当前加载的 Harmony 版本下启动,因此已被关闭.请查看 Player.log.</s>
+   <s id="VizzyStudio.Startup.NeedsHarmony">VizzyStudio 需要 Juno Harmony 模组,因此已被关闭.请安装并启用 Juno Harmony, 然后重启游戏.</s>
+   <s id="VizzyStudio.Startup.ReplacedMods">VizzyStudio 已包含 {0} 的功能.请移除这些模组,否则两者会作用于同一个编辑器.</s>
+   <s id="VizzyStudio.Startup.HarmonyFailed">VizzyStudio 无法在当前加载的 Harmony 版本下启动,因此已被关闭.请查看 Player.log.</s>
    <!-- Update -->
-   <s id="VizzyStudio.Update.Available">Vizzy Studio 有新版本可用.\n\n已安装:{0}\n最新:{1}</s>
+   <s id="VizzyStudio.Update.Available">VizzyStudio 有新版本可用.\n\n已安装:{0}\n最新:{1}</s>
    <s id="VizzyStudio.Update.Open">打开下载页面</s>
    <s id="VizzyStudio.Update.Later">稍后</s>
    <!-- BlockSearch -->

@@ -13,15 +13,15 @@ MonoBehaviour:
   m_Name: ModData
   m_EditorClassIdentifier: 
   _assemblies:
-  - Vizzy Studio.dll
-  _author: Dooiereier, Oxeter and Torifune
+  - VizzyStudio.dll
+  _author: Dooiereier and Torifune
   _description: A general upgrade of the Vizzy user experience. Edit a running craft's
     Vizzy program in flight in the stock editor, Block Search, Funk auto-fill and
     coloring, Jump To tagged blocks, Export Block, Clean Unused Variables, Arrange
     MFD and Editor Culling (experimental) for large programs. Code by Dooiereier
     and Torifune. Requires Juno Harmony.
   _loadPriority: 10
-  _name: Vizzy Studio
+  _name: VizzyStudio
   _otherAssets:
   - {fileID: 4900000, guid: 8e94f41a864746bf93bec0cf537f0cb5, type: 3}
   - {fileID: 2800000, guid: 1c0e21f9e83fb4c44b60ac9eede2688a, type: 3}

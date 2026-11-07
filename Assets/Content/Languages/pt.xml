@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Strings>
-   <!-- Vizzy Studio: Portuguese (Portugal), with the game's own terms. Corrections welcome. -->
+   <!-- VizzyStudio: Portuguese (Portugal), with the game's own terms. Corrections welcome. -->
    <!-- Flight -->
    <s id="VizzyStudio.Flight.NoMfdProgram">Não há nenhum programa de MFD personalizado neste veículo.</s>
    <s id="VizzyStudio.Flight.NoProgramToRestart">Não há nenhum programa Vizzy para reiniciar neste veículo.</s>
@@ -63,11 +63,11 @@
    <s id="VizzyStudio.Export.WriteFailed">Não foi possível exportar para esse ficheiro: {0}</s>
    <s id="VizzyStudio.Export.ReadFailed">Não foi possível ler este bloco: {0}</s>
    <!-- Startup -->
-   <s id="VizzyStudio.Startup.NeedsHarmony">O Vizzy Studio precisa do mod Juno Harmony, por isso está desligado. Instala e ativa o Juno Harmony e depois reinicia o jogo.</s>
-   <s id="VizzyStudio.Startup.ReplacedMods">O Vizzy Studio inclui as funcionalidades de {0}. Remove esses mods, senão ambos atuam no mesmo editor.</s>
-   <s id="VizzyStudio.Startup.HarmonyFailed">O Vizzy Studio não conseguiu arrancar com a versão do Harmony carregada, por isso está desligado. Vê o Player.log.</s>
+   <s id="VizzyStudio.Startup.NeedsHarmony">O VizzyStudio precisa do mod Juno Harmony, por isso está desligado. Instala e ativa o Juno Harmony e depois reinicia o jogo.</s>
+   <s id="VizzyStudio.Startup.ReplacedMods">O VizzyStudio inclui as funcionalidades de {0}. Remove esses mods, senão ambos atuam no mesmo editor.</s>
+   <s id="VizzyStudio.Startup.HarmonyFailed">O VizzyStudio não conseguiu arrancar com a versão do Harmony carregada, por isso está desligado. Vê o Player.log.</s>
    <!-- Update -->
-   <s id="VizzyStudio.Update.Available">Está disponível uma nova versão do Vizzy Studio.\n\nInstalada: {0}\nMais recente: {1}</s>
+   <s id="VizzyStudio.Update.Available">Está disponível uma nova versão do VizzyStudio.\n\nInstalada: {0}\nMais recente: {1}</s>
    <s id="VizzyStudio.Update.Open">ABRIR PÁGINA DE TRANSFERÊNCIA</s>
    <s id="VizzyStudio.Update.Later">MAIS TARDE</s>
    <!-- BlockSearch -->

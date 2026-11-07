@@ -1,4 +1,4 @@
-# Vizzy Studio: design
+# VizzyStudio: design
 
 Pause in flight, open a craft's program in the stock Vizzy editor, change it and apply. The program
 carries on from where it was, so you can repeat quickload, edit, fly to tune things like PID gains.
@@ -179,7 +179,7 @@ Both by Dooiereier. Replace the separate mods, and the mod warns if they're also
 
 ## Languages
 
-Players' text lives in `Assets/Content/Languages/EN-US.xml` (the baseline), `pt.xml` and `zh-Hans.xml`, the languages the game itself ships. The files are Other Assets in `ModData`, so they're packed; at startup `ModManagerScript.LoadModLanguages` installs each `.xml` under a `languages/` path as that language's `Strings_Vizzy Studio.xml`. Code reads them through `Text.Get` (the game's `Locale.GetString`, so the game's language applies and a missing key falls back to English), with `{0}` placeholders and `.One`/`.Many` keys for counts. Settings use `{Key}` names, resolved by the settings screen, and keep their explicit XML names. Log lines stay English. The offline tests read the English file and check that every key the code names exists, and that each language has every key, no empty text and the same placeholders.
+Players' text lives in `Assets/Content/Languages/EN-US.xml` (the baseline), `pt.xml` and `zh-Hans.xml`, the languages the game itself ships. The files are Other Assets in `ModData`, so they're packed; at startup `ModManagerScript.LoadModLanguages` installs each `.xml` under a `languages/` path as that language's `Strings_VizzyStudio.xml`. Code reads them through `Text.Get` (the game's `Locale.GetString`, so the game's language applies and a missing key falls back to English), with `{0}` placeholders and `.One`/`.Many` keys for counts. Settings use `{Key}` names, resolved by the settings screen, and keep their explicit XML names. Log lines stay English. The offline tests read the English file and check that every key the code names exists, and that each language has every key, no empty text and the same placeholders.
 
 ## Editor culling
 

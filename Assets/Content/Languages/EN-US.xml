@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Strings>
-   <!-- Vizzy Studio: English, the baseline every key starts in. -->
+   <!-- VizzyStudio: English, the baseline every key starts in. -->
    <!-- Flight -->
    <s id="VizzyStudio.Flight.NoMfdProgram">No custom MFD program on this craft.</s>
    <s id="VizzyStudio.Flight.NoProgramToRestart">No Vizzy program to restart on this craft.</s>
@@ -63,11 +63,11 @@
    <s id="VizzyStudio.Export.WriteFailed">Couldn't export into that file: {0}</s>
    <s id="VizzyStudio.Export.ReadFailed">Couldn't read this block: {0}</s>
    <!-- Startup -->
-   <s id="VizzyStudio.Startup.NeedsHarmony">Vizzy Studio needs the Juno Harmony mod, so it is switched off. Install and enable Juno Harmony, then restart the game.</s>
-   <s id="VizzyStudio.Startup.ReplacedMods">Vizzy Studio includes the features of {0}. Remove those mods, or both will act on the same editor.</s>
-   <s id="VizzyStudio.Startup.HarmonyFailed">Vizzy Studio couldn't start with the Harmony version that's loaded, so it is switched off. See Player.log.</s>
+   <s id="VizzyStudio.Startup.NeedsHarmony">VizzyStudio needs the Juno Harmony mod, so it is switched off. Install and enable Juno Harmony, then restart the game.</s>
+   <s id="VizzyStudio.Startup.ReplacedMods">VizzyStudio includes the features of {0}. Remove those mods, or both will act on the same editor.</s>
+   <s id="VizzyStudio.Startup.HarmonyFailed">VizzyStudio couldn't start with the Harmony version that's loaded, so it is switched off. See Player.log.</s>
    <!-- Update -->
-   <s id="VizzyStudio.Update.Available">A new version of Vizzy Studio is available.\n\nInstalled: {0}\nLatest: {1}</s>
+   <s id="VizzyStudio.Update.Available">A new version of VizzyStudio is available.\n\nInstalled: {0}\nLatest: {1}</s>
    <s id="VizzyStudio.Update.Open">OPEN DOWNLOAD PAGE</s>
    <s id="VizzyStudio.Update.Later">LATER</s>
    <!-- BlockSearch -->
