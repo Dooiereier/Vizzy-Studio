@@ -100,11 +100,35 @@ namespace Assets.Scripts
 
         private static readonly HashSet<string> ArithmeticOperators = new HashSet<string> { "+", "-", "*", "/" };
 
-        private static readonly HashSet<string> VectorProperties = new HashSet<string>
+        // Only if the game's own registry can't be read: the common vector properties.
+        private static readonly HashSet<string> FallbackVectorProperties = new HashSet<string>
         {
-            "Nav.Position", "Nav.CraftDirection", "Nav.CraftUp", "Nav.North",
-            "Vel.SurfaceVelocity", "Vel.OrbitVelocity", "Vel.TargetVelocity", "Vel.Gravity", "Vel.Drag", "Vel.Acceleration", "Vel.AngularVelocity",
+            "Nav.Position", "Nav.CraftDirection", "Nav.CraftRight", "Nav.CraftUp", "Nav.North", "Nav.East",
+            "Vel.SurfaceVelocity", "Vel.OrbitVelocity", "Vel.Gravity", "Vel.Drag", "Vel.Acceleration", "Vel.AngularVelocity",
+            "Target.Position", "Target.Velocity", "Craft.Position", "Craft.Velocity", "Part.Position",
         };
+
+        /// <summary>
+        /// Whether a craft property gives a vector, from the type the game registers it with
+        /// (CraftProperties.GetProperty(xmlName).ItemType), so every property counts, including future ones.
+        /// </summary>
+        private static bool IsVectorProperty(string property)
+        {
+            try
+            {
+                var registered = CraftProperties.GetProperty(property);
+                if (registered != null)
+                {
+                    return registered.ItemType == ListItemInfoType.Vector;
+                }
+            }
+            catch (Exception)
+            {
+                // An older or changed game: the fallback list below.
+            }
+
+            return FallbackVectorProperties.Contains(property);
+        }
 
         private static readonly FieldInfo CraftPropertyField = typeof(CraftPropertyExpression).GetField("_property", BindingFlags.Instance | BindingFlags.NonPublic);
 
@@ -164,7 +188,7 @@ namespace Assets.Scripts
                     return conditional.Expressions != null && conditional.Expressions.Count > 2
                         && (IsVector(conditional.Expressions[1], vectors) || IsVector(conditional.Expressions[2], vectors));
                 case CraftPropertyExpression _:
-                    return CraftPropertyField?.GetValue(node) is string property && VectorProperties.Contains(property);
+                    return CraftPropertyField?.GetValue(node) is string property && IsVectorProperty(property);
                 case EvaluationExpression funk:
                     return funk.GetExpression(0) is ConstantExpression text && FunkCompletion.IsVectorFunk(text.ExpressionResult.TextValue, VectorDataNames);
                 default:
