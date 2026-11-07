@@ -551,17 +551,24 @@ namespace Assets.Scripts
             _off.Clear();
         }
 
+        // Closing the editor disables and destroys this with it. Switching every stack back on then would only
+        // cost time (a fifth of a second on a large program): the save reads switched-off stacks too, and when
+        // the editor comes back, Update switches them on as they come near.
         private void OnDisable()
         {
             Instances.Remove(this);
-            this.RestoreAll();
             this.SetMask(false);
         }
 
         private void OnDestroy()
         {
             Instances.Remove(this);
-            this.RestoreAll();
+            foreach (var stack in _off)
+            {
+                Off.Remove(stack);
+            }
+
+            _off.Clear();
             this.SetMask(false);
         }
     }

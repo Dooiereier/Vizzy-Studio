@@ -38,6 +38,7 @@ namespace Assets.Scripts
 
             _container = container;
             _editor = _controller.VizzyUI;
+            EditorDefaultView.Capture(_editor as VizzyUIScript, container);
             _key = Key(_editor);
             _editor.Closed += OnEditorClosed;
             if (Views.TryGetValue(_key, out var view))

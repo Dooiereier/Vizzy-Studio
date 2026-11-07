@@ -67,6 +67,7 @@ namespace Assets.Scripts
             }
 
             _restoreViewPending = false;
+            EditorDefaultView.Capture(_editor as VizzyUIScript, _viewContainer);
             if (Views.TryGetValue(_key, out var view))
             {
                 // Zoom first: it moves the canvas too.
