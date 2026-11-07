@@ -34,6 +34,11 @@ namespace Assets.Scripts
 
         private readonly List<BlockElementScript> _blocks = new List<BlockElementScript>();
         private readonly Dictionary<Transform, Rect> _stacks = new Dictionary<Transform, Rect>();
+        private readonly Dictionary<Transform, int> _stackBlocks = new Dictionary<Transform, int>();
+
+        // The mask clips every block it covers, which costs time when nearly all of them are in view (zoomed
+        // out), so it's only on while more blocks that are switched on lie outside the view than inside it.
+        private bool _maskWanted;
         private readonly HashSet<Transform> _off = new HashSet<Transform>();
 
         // Every editor's switched-off stacks, for IsCulled.
@@ -178,7 +183,7 @@ namespace Assets.Scripts
                     culling = false;
                 }
 
-                this.SetMask(culling);
+                this.SetMask(culling && _maskWanted);
                 if (!culling)
                 {
                     this.RestoreAll();
@@ -223,7 +228,10 @@ namespace Assets.Scripts
                 var width = Mathf.Abs(b.x - a.x);
                 var height = Mathf.Abs(b.y - a.y);
                 var near = Rect.MinMaxRect(Mathf.Min(a.x, b.x) - width, Mathf.Min(a.y, b.y) - height, Mathf.Max(a.x, b.x) + width, Mathf.Max(a.y, b.y) + height);
+                var inView = Rect.MinMaxRect(Mathf.Min(a.x, b.x), Mathf.Min(a.y, b.y), Mathf.Max(a.x, b.x), Mathf.Max(a.y, b.y));
                 var busy = Busy();
+                var inside = 0;
+                var outside = 0;
 
                 foreach (var pair in _stacks)
                 {
@@ -240,6 +248,16 @@ namespace Assets.Scripts
                             Off.Remove(stack);
                             stack.gameObject.SetActive(true);
                         }
+
+                        _stackBlocks.TryGetValue(stack, out var count);
+                        if (pair.Value.Overlaps(inView))
+                        {
+                            inside += count;
+                        }
+                        else
+                        {
+                            outside += count;
+                        }
                     }
                     else if (stack.gameObject.activeSelf)
                     {
@@ -248,6 +266,9 @@ namespace Assets.Scripts
                         Off.Add(stack);
                     }
                 }
+
+                // With some room either way, so it doesn't flicker on and off at the boundary.
+                _maskWanted = _maskWanted ? outside * 2 >= inside : outside > inside;
             }
             catch (Exception e)
             {
@@ -271,6 +292,7 @@ namespace Assets.Scripts
             _blocks.Clear();
             program.GetComponentsInChildren(true, _blocks);
             _stacks.Clear();
+            _stackBlocks.Clear();
             var scale = program.lossyScale.x;
             foreach (var block in _blocks)
             {
@@ -299,6 +321,8 @@ namespace Assets.Scripts
                 _stacks[stack] = _stacks.TryGetValue(stack, out var known)
                     ? Rect.MinMaxRect(Mathf.Min(known.xMin, box.xMin), Mathf.Min(known.yMin, box.yMin), Mathf.Max(known.xMax, box.xMax), Mathf.Max(known.yMax, box.yMax))
                     : box;
+                _stackBlocks.TryGetValue(stack, out var blocks);
+                _stackBlocks[stack] = blocks + 1;
             }
 
             _off.RemoveWhere(stack => stack == null);
@@ -319,7 +343,7 @@ namespace Assets.Scripts
             if (_frames > 0 && _nextLog > 0f && ModSettings.Instance.DebugLogging.Value)
             {
                 var offBlocks = _blocks.Count(block => block != null && !block.gameObject.activeInHierarchy);
-                EditorLog.Debug("Editor: " + (1000f * _frameTime / _frames).ToString("0.0") + " ms per frame, " + _off.Count + " of " + _stacks.Count + " stacks (" + offBlocks + " of " + _blocks.Count + " blocks) switched off, culling " + (ModSettings.Instance.EditorCulling.Value ? "on" : "off") + ".");
+                EditorLog.Debug("Editor: " + (1000f * _frameTime / _frames).ToString("0.0") + " ms per frame, " + _off.Count + " of " + _stacks.Count + " stacks (" + offBlocks + " of " + _blocks.Count + " blocks) switched off, culling " + (ModSettings.Instance.EditorCulling.Value ? "on" : "off") + ", mask " + (_mask != null ? "on" : "off") + ".");
             }
 
             _nextLog = now + LogInterval;
