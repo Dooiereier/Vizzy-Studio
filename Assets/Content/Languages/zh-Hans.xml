@@ -25,7 +25,7 @@
    <!-- Editor -->
    <s id="VizzyStudio.Editor.CleanVariablesTooltip">询问后删除此程序未使用的全局变量.其他部件的程序或 InputController 仍可能按名称读取它们.</s>
    <s id="VizzyStudio.Editor.CleanVariables">清理变量</s>
-   <s id="VizzyStudio.Editor.ExportBlockTooltip">先在画布上点击一个块,再点击此处,即可将其复制到另一个已保存的程序.指令会带上其下方的块.</s>
+   <s id="VizzyStudio.Editor.ExportBlockTooltip">先点击一个块,再点击这里,即可将它复制到另一个已保存的程序中,连同它下方的块以及它用到的变量、自定义表达式和自定义指令.</s>
    <s id="VizzyStudio.Editor.ExportBlock">导出块</s>
    <s id="VizzyStudio.Editor.ExportImageTooltip">将整个 Vizzy 画布导出为 PNG 图片.图片保存在 /UserData/FlightPrograms/Vizzy Images.</s>
    <s id="VizzyStudio.Editor.ExportImage">导出图片</s>

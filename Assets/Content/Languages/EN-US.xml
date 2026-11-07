@@ -25,7 +25,7 @@
    <!-- Editor -->
    <s id="VizzyStudio.Editor.CleanVariablesTooltip">Removes global variables this program doesn't use, after asking. Another part's program or an InputController could still read them by name.</s>
    <s id="VizzyStudio.Editor.CleanVariables">CLEAN VARIABLES</s>
-   <s id="VizzyStudio.Editor.ExportBlockTooltip">Click a block on the canvas, then this, to copy it to another saved program. An instruction brings the blocks below it.</s>
+   <s id="VizzyStudio.Editor.ExportBlockTooltip">Click a block, then this, to copy it to another saved program, with the blocks below it and the variables, custom expressions and custom instructions it uses.</s>
    <s id="VizzyStudio.Editor.ExportBlock">EXPORT BLOCK</s>
    <s id="VizzyStudio.Editor.ExportImageTooltip">Exports the whole Vizzy canvas as a PNG image. Images can be found at /UserData/FlightPrograms/Vizzy Images.</s>
    <s id="VizzyStudio.Editor.ExportImage">EXPORT IMAGE</s>
