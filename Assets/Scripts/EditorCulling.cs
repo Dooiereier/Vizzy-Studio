@@ -27,6 +27,9 @@ namespace Assets.Scripts
         private const float RefreshInterval = 2f;
         private const float LogInterval = 5f;
 
+        // How far around the view stacks stay on, in view widths and heights: room for a quarter second of panning.
+        private const float Margin = 0.5f;
+
         private static readonly List<EditorCulling> Instances = new List<EditorCulling>();
 
         /// <summary>Why culling can't run at all, such as a patch it needs that didn't apply; null when it can.</summary>
@@ -220,13 +223,13 @@ namespace Assets.Scripts
                     return;
                 }
 
-                // The view and one view's width and height around it, in the program's own space, where a
+                // The view and half a view's width and height around it, in the program's own space, where a
                 // stack's place only changes when it's edited, not when the view pans or zooms.
                 view.GetWorldCorners(_corners);
                 var a = program.InverseTransformPoint(_corners[0]);
                 var b = program.InverseTransformPoint(_corners[2]);
-                var width = Mathf.Abs(b.x - a.x);
-                var height = Mathf.Abs(b.y - a.y);
+                var width = Margin * Mathf.Abs(b.x - a.x);
+                var height = Margin * Mathf.Abs(b.y - a.y);
                 var near = Rect.MinMaxRect(Mathf.Min(a.x, b.x) - width, Mathf.Min(a.y, b.y) - height, Mathf.Max(a.x, b.x) + width, Mathf.Max(a.y, b.y) + height);
                 var inView = Rect.MinMaxRect(Mathf.Min(a.x, b.x), Mathf.Min(a.y, b.y), Mathf.Max(a.x, b.x), Mathf.Max(a.y, b.y));
                 var busy = Busy();

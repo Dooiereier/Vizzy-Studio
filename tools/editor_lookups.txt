@@ -5,7 +5,7 @@
 VizzyUIScript.GetVariableElements patched: whole program; behind RenameVariable and DeleteVariable (and Clean Variables).
 VizzyUIScript.CanDeleteSelection patched: whole program.
 VizzyUIScript.LoadFlightProgram patched: destroys the old program's blocks before loading (Load, Import, New, Undo, Redo).
-DragSelection.IdentifyTargetConnectionPoints harmless: drop targets; switched-off stacks are more than a view away.
+DragSelection.IdentifyTargetConnectionPoints harmless: drop targets; switched-off stacks are more than half a view away.
 VizzyUIController.LoadNodes harmless: inside a toolbox block it has just built.
 VizzyUIController.OnEditVariableClicked harmless: inside the variables flyout, not the program.
 BlockElementScript.Initialize harmless: inside the block itself, as it's built (stacks start switched on).
