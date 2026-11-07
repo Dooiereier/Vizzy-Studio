@@ -76,7 +76,7 @@ namespace Assets.Scripts
                         new XAttribute("class", "nav-sphere-row"),
                         arrangeMfd ? FlyoutButton(ns, ArrangeMfdId, Text.Get("VizzyStudio.Buttons.ArrangeMfd"), "VizzyStudio/Sprites/IconMfd") : null,
                         FlyoutButton(ns, RestartId, Text.Get("VizzyStudio.Buttons.RestartVizzy"), "Ui/Sprites/Flight/IconRetry"),
-                        FlyoutButton(ns, EditId, Text.Get("VizzyStudio.Buttons.EditVizzy"), "Ui/Sprites/Design/IconButtonEdit"))));
+                        FlyoutButton(ns, EditId, Text.Get("VizzyStudio.Buttons.EditVizzy"), "VizzyStudio/Sprites/IconVariables"))));
             }
             catch (Exception e)
             {
