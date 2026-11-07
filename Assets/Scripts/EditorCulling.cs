@@ -75,6 +75,7 @@ namespace Assets.Scripts
         private bool _holding;
         private float _holdStarted;
         private int _lastBlockCount = -1;
+        private int _lastUnsized = -1;
 
         /// <summary>While true, everything stays switched on and unmasked, such as while the program is saved as an image.</summary>
         public bool Paused { get; set; }
@@ -260,8 +261,12 @@ namespace Assets.Scripts
             if (_holding)
             {
                 var waited = Time.realtimeSinceStartup - _holdStarted;
-                var built = _unsized.Count == 0 && _blocks.Count > 0 && _blocks.Count == _lastBlockCount;
+                // Done once building stops: the counts of blocks and of blocks without a size stay the same
+                // (some blocks never get a size, so it can't wait for none).
+                var unsized = _unsized.Values.Sum();
+                var built = _blocks.Count > 0 && _blocks.Count == _lastBlockCount && unsized == _lastUnsized;
                 _lastBlockCount = _blocks.Count;
+                _lastUnsized = unsized;
                 if (!built && waited < 30f)
                 {
                     return;
@@ -270,7 +275,7 @@ namespace Assets.Scripts
                 _holding = false;
                 if (ModSettings.Instance.DebugLogging.Value)
                 {
-                    EditorLog.Debug("Editor: built (" + _blocks.Count + " blocks in " + _stacks.Count + " stacks) " + waited.ToString("0.0") + " s after loading" + (built ? "" : ", or still not quite") + "; culling starts.");
+                    EditorLog.Debug("Editor: built (" + _blocks.Count + " blocks in " + _stacks.Count + " stacks, " + unsized + " without a size) " + waited.ToString("0.0") + " s after loading" + (built ? "" : ", or still not quite") + "; culling starts.");
                 }
             }
 
@@ -343,6 +348,7 @@ namespace Assets.Scripts
             _holding = true;
             _holdStarted = Time.realtimeSinceStartup;
             _lastBlockCount = -1;
+            _lastUnsized = -1;
             _nextCheck = 0f;
             _nextRefresh = 0f;
         }

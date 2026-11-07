@@ -82,9 +82,11 @@ namespace Assets.Scripts
             }
 
             // Blocks never shown are built in their first active frames, the blocks inside them after that, and
-            // laid out last: wait until no block is without a size and the count stopped growing.
+            // laid out last: wait until that stops, when neither the number of blocks nor of blocks without a size
+            // changes any more. Some blocks never get a size, so it can't wait for none.
             var building = Stopwatch.StartNew();
             var lastCount = -1;
+            var lastUnsized = -1;
             var frame = 0;
             while (building.Elapsed.TotalSeconds < 60)
             {
@@ -101,12 +103,13 @@ namespace Assets.Scripts
                     yield break;
                 }
 
-                if (unsized == 0 && count == lastCount)
+                if (count == lastCount && unsized == lastUnsized)
                 {
                     break;
                 }
 
                 lastCount = count;
+                lastUnsized = unsized;
             }
 
             building.Stop();
@@ -126,7 +129,7 @@ namespace Assets.Scripts
                 width = Mathf.Max(1, Mathf.CeilToInt(box.width * scale));
                 height = Mathf.Max(1, Mathf.CeilToInt(box.height * scale));
                 EditorLog.Debug("Image: zoom " + program.localScale.x.ToString("0.###") + ", program box " + box.width.ToString("0") + " x " + box.height.ToString("0")
-                    + ", image " + width + " x " + height + " at scale " + scale.ToString("0.###") + ", " + lastCount + " blocks built in " + building.ElapsedMilliseconds + " ms.");
+                    + ", image " + width + " x " + height + " at scale " + scale.ToString("0.###") + ", " + lastCount + " blocks (" + lastUnsized + " without a size) built in " + building.ElapsedMilliseconds + " ms.");
                 this.Prepare(program, box, scale, width, height);
             }))
             {
