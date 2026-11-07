@@ -30,6 +30,11 @@ public static class FunkCompletionTests
         check("FD. filters", Names("FD.Alt").SequenceEqual(new[] { "FD.AltitudeAboveSeaLevel" }));
         check("v: lists variables", Names("v:").SequenceEqual(new[] { "v:Kp", "v:Target" }));
         check("OD. lists orbit data", Names("OD.In").SequenceEqual(new[] { "OD.Inclination" }));
+        check("fd. in lower case filters too", Names("fd.alt").SequenceEqual(new[] { "FD.AltitudeAboveSeaLevel" }));
+        check("od. in lower case filters too", Names("od.in").SequenceEqual(new[] { "OD.Inclination" }));
+        check("a lower-case complete name is still offered in its own case", Names("fd.pitch").SequenceEqual(new[] { "FD.Pitch" }));
+        var lower = FunkCompletion.Find("1 + fd.alt", 10, catalog, null, null);
+        check("fd. is replaced by FD.", lower.Apply("1 + fd.alt", lower.Suggestions.First(), out _) == "1 + FD.AltitudeAboveSeaLevel");
         check("flight names appear with their prefix", Names("Alt").Contains("FD.AltitudeAboveSeaLevel"));
         check("flight names wait for two letters", !Names("A").Contains("FD.AltitudeAboveSeaLevel"));
         check("start-of-name beats contains", Names("t").IndexOf("Throttle") < Names("t").IndexOf("Pitch"));

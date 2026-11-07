@@ -200,7 +200,8 @@ namespace Assets.Scripts
                 ("v:", catalog.Variables),
             })
             {
-                if (word.StartsWith(prefix, StringComparison.Ordinal))
+                // Any case: fd.pos offers FD.Position, and the suggestion puts the prefix in its own case.
+                if (word.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
                 {
                     return Match(word.Substring(prefix.Length), names, prefix, 0, true);
                 }
