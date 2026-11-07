@@ -30,6 +30,10 @@ namespace Assets.Scripts
         // How far around the view stacks stay on, in view widths and heights: room for a quarter second of panning.
         private const float Margin = 0.5f;
 
+        // A generous guess at a block's height and a stack's width, in program units, for blocks not laid out yet.
+        private const float EstimatedBlockHeight = 60f;
+        private const float EstimatedWidth = 2000f;
+
         private static readonly List<EditorCulling> Instances = new List<EditorCulling>();
 
         /// <summary>Why culling can't run at all, such as a patch it needs that didn't apply; null when it can.</summary>
@@ -38,6 +42,7 @@ namespace Assets.Scripts
         private readonly List<BlockElementScript> _blocks = new List<BlockElementScript>();
         private readonly Dictionary<Transform, Rect> _stacks = new Dictionary<Transform, Rect>();
         private readonly Dictionary<Transform, int> _stackBlocks = new Dictionary<Transform, int>();
+        private readonly Dictionary<Transform, int> _unsized = new Dictionary<Transform, int>();
 
         // The mask clips every block it covers, which costs time when nearly all of them are in view (zoomed
         // out), so it's only on while more blocks that are switched on lie outside the view than inside it.
@@ -63,6 +68,9 @@ namespace Assets.Scripts
         private int _frames;
         private float _frameTime;
 
+        // After a load, the next few frames' times are logged: the first one lays out what's switched on.
+        private int _framesToLog;
+
         public void Connect(VizzyUIController controller)
         {
             _controller = controller;
@@ -82,6 +90,9 @@ namespace Assets.Scripts
                     _blocked = "couldn't check other mods' patches: " + e.Message;
                 }
             }
+
+            this.FirstPass();
+            this.LogLoad(-1);
         }
 
         /// <summary>
@@ -204,74 +215,7 @@ namespace Assets.Scripts
                 }
 
                 _nextCheck = now + CheckInterval;
-                var program = _controller == null ? null : (_controller.VizzyUI as VizzyUIScript)?.ProgramTransform;
-                var view = _controller == null || _controller.ProgramContainer == null ? null : (RectTransform)_controller.ProgramContainer.transform;
-                if (program == null || view == null)
-                {
-                    return;
-                }
-
-                // Stacks come and go with editing and undo; a new one starts switched on, which is safe.
-                if (now >= _nextRefresh)
-                {
-                    _nextRefresh = now + RefreshInterval;
-                    this.Measure(program);
-                }
-
-                if (!culling)
-                {
-                    return;
-                }
-
-                // The view and half a view's width and height around it, in the program's own space, where a
-                // stack's place only changes when it's edited, not when the view pans or zooms.
-                view.GetWorldCorners(_corners);
-                var a = program.InverseTransformPoint(_corners[0]);
-                var b = program.InverseTransformPoint(_corners[2]);
-                var width = Margin * Mathf.Abs(b.x - a.x);
-                var height = Margin * Mathf.Abs(b.y - a.y);
-                var near = Rect.MinMaxRect(Mathf.Min(a.x, b.x) - width, Mathf.Min(a.y, b.y) - height, Mathf.Max(a.x, b.x) + width, Mathf.Max(a.y, b.y) + height);
-                var inView = Rect.MinMaxRect(Mathf.Min(a.x, b.x), Mathf.Min(a.y, b.y), Mathf.Max(a.x, b.x), Mathf.Max(a.y, b.y));
-                var busy = Busy();
-                var inside = 0;
-                var outside = 0;
-
-                foreach (var pair in _stacks)
-                {
-                    var stack = pair.Key;
-                    if (stack == null)
-                    {
-                        continue;
-                    }
-
-                    if (pair.Value.Overlaps(near) || (busy != null && busy.IsChildOf(stack)))
-                    {
-                        if (_off.Remove(stack))
-                        {
-                            Off.Remove(stack);
-                            stack.gameObject.SetActive(true);
-                        }
-
-                        _stackBlocks.TryGetValue(stack, out var count);
-                        if (pair.Value.Overlaps(inView))
-                        {
-                            inside += count;
-                        }
-                        else
-                        {
-                            outside += count;
-                        }
-                    }
-                    else if (stack.gameObject.activeSelf)
-                    {
-                        stack.gameObject.SetActive(false);
-                        _off.Add(stack);
-                        Off.Add(stack);
-                    }
-                }
-
-                // With some room either way, so it doesn't flicker on and off at the boundary.
-                _maskWanted = _maskWanted ? outside * 2 >= inside : outside > inside;
+                this.Pass(culling, now >= _nextRefresh);
             }
             catch (Exception e)
             {
@@ -279,6 +223,132 @@ namespace Assets.Scripts
                 this.RestoreAll();
                 this.SetMask(false);
                 this.enabled = false;
+            }
+        }
+
+        /// <summary>Measures if asked, then switches stacks off and on for where the view is now.</summary>
+        private void Pass(bool culling, bool measure)
+        {
+            var program = _controller == null ? null : (_controller.VizzyUI as VizzyUIScript)?.ProgramTransform;
+            var view = _controller == null || _controller.ProgramContainer == null ? null : (RectTransform)_controller.ProgramContainer.transform;
+            if (program == null || view == null)
+            {
+                return;
+            }
+
+            // Stacks come and go with editing and undo; a new one starts switched on, which is safe.
+            if (measure)
+            {
+                _nextRefresh = Time.unscaledTime + RefreshInterval;
+                this.Measure(program);
+            }
+
+            if (!culling)
+            {
+                return;
+            }
+
+            // The view and half a view's width and height around it, in the program's own space, where a
+            // stack's place only changes when it's edited, not when the view pans or zooms.
+            view.GetWorldCorners(_corners);
+            var a = program.InverseTransformPoint(_corners[0]);
+            var b = program.InverseTransformPoint(_corners[2]);
+            var width = Margin * Mathf.Abs(b.x - a.x);
+            var height = Margin * Mathf.Abs(b.y - a.y);
+            var near = Rect.MinMaxRect(Mathf.Min(a.x, b.x) - width, Mathf.Min(a.y, b.y) - height, Mathf.Max(a.x, b.x) + width, Mathf.Max(a.y, b.y) + height);
+            var inView = Rect.MinMaxRect(Mathf.Min(a.x, b.x), Mathf.Min(a.y, b.y), Mathf.Max(a.x, b.x), Mathf.Max(a.y, b.y));
+            var busy = Busy();
+            var inside = 0;
+            var outside = 0;
+
+            foreach (var pair in _stacks)
+            {
+                var stack = pair.Key;
+                if (stack == null)
+                {
+                    continue;
+                }
+
+                if (pair.Value.Overlaps(near) || (busy != null && busy.IsChildOf(stack)))
+                {
+                    if (_off.Remove(stack))
+                    {
+                        Off.Remove(stack);
+                        stack.gameObject.SetActive(true);
+                    }
+
+                    _stackBlocks.TryGetValue(stack, out var count);
+                    if (pair.Value.Overlaps(inView))
+                    {
+                        inside += count;
+                    }
+                    else
+                    {
+                        outside += count;
+                    }
+                }
+                else if (stack.gameObject.activeSelf)
+                {
+                    stack.gameObject.SetActive(false);
+                    _off.Add(stack);
+                    Off.Add(stack);
+                }
+            }
+
+            // With some room either way, so it doesn't flicker on and off at the boundary.
+            _maskWanted = _maskWanted ? outside * 2 >= inside : outside > inside;
+        }
+
+        /// <summary>
+        /// A pass right away, when the editor connects and right after a program loads: the blocks are created
+        /// then but lay out on their first active frame, so stacks switched off now never lay out until they're
+        /// near. Their sizes aren't known yet, so they're estimated (generously), and measured again soon.
+        /// </summary>
+        public void FirstPass()
+        {
+            try
+            {
+                if (!this.isActiveAndEnabled || _blocked != null || !ModSettings.Instance.EditorCulling.Value)
+                {
+                    return;
+                }
+
+                this.Pass(true, true);
+                _nextRefresh = Time.unscaledTime + CheckInterval;
+                _nextCheck = Time.unscaledTime + CheckInterval;
+            }
+            catch (Exception e)
+            {
+                EditorLog.Warning("Editor culling's first pass failed: " + e.Message);
+            }
+        }
+
+        /// <summary>After a stock program load: the editor's first pass, and with Debug Logging the time.</summary>
+        public static void AfterLoad(object vizzyUI, long milliseconds)
+        {
+            foreach (var culling in Instances.ToList())
+            {
+                if (culling != null && culling._controller != null && ReferenceEquals(culling._controller.VizzyUI, vizzyUI))
+                {
+                    culling.FirstPass();
+                    culling.LogLoad(milliseconds);
+                    return;
+                }
+            }
+
+            if (ModSettings.Instance.DebugLogging.Value)
+            {
+                EditorLog.Debug("Editor: program loaded in " + milliseconds + " ms, before culling was connected.");
+            }
+        }
+
+        private void LogLoad(long milliseconds)
+        {
+            if (ModSettings.Instance.DebugLogging.Value)
+            {
+                var blocks = _stackBlocks.Values.Sum();
+                EditorLog.Debug("Editor: " + (milliseconds < 0 ? "culling connected" : "program loaded in " + milliseconds + " ms") + " (" + blocks + " blocks); first pass switched off " + _off.Count + " of " + _stacks.Count + " stacks.");
+                _framesToLog = 3;
             }
         }
 
@@ -296,6 +366,7 @@ namespace Assets.Scripts
             program.GetComponentsInChildren(true, _blocks);
             _stacks.Clear();
             _stackBlocks.Clear();
+            _unsized.Clear();
             var scale = program.lossyScale.x;
             foreach (var block in _blocks)
             {
@@ -317,6 +388,13 @@ namespace Assets.Scripts
 
                 var rect = block.RectTransform;
                 var size = block.Size * (rect.lossyScale.x / scale);
+                if (size.x <= 0f || size.y <= 0f)
+                {
+                    // Not laid out yet: only its corner is known; the stack gets an estimate below.
+                    _unsized.TryGetValue(stack, out var unsized);
+                    _unsized[stack] = unsized + 1;
+                }
+
                 var corner = program.InverseTransformPoint(rect.position);
                 var left = corner.x - (rect.pivot.x * size.x);
                 var top = corner.y + ((1f - rect.pivot.y) * size.y);
@@ -328,6 +406,17 @@ namespace Assets.Scripts
                 _stackBlocks[stack] = blocks + 1;
             }
 
+            // A stack with blocks not laid out may reach much further than its known part: each such block
+            // counts as EstimatedBlockHeight more below its top, and the stack as at least EstimatedWidth wide.
+            // Too big is safe: a stack switched on needlessly lays out and is measured properly next time.
+            foreach (var pair in _unsized)
+            {
+                if (_stacks.TryGetValue(pair.Key, out var known))
+                {
+                    _stacks[pair.Key] = Rect.MinMaxRect(known.xMin, Mathf.Min(known.yMin, known.yMax - (pair.Value * EstimatedBlockHeight)), Mathf.Max(known.xMax, known.xMin + EstimatedWidth), known.yMax);
+                }
+            }
+
             _off.RemoveWhere(stack => stack == null);
             Off.RemoveWhere(stack => stack == null);
         }
@@ -335,6 +424,12 @@ namespace Assets.Scripts
         /// <summary>With Debug Logging, the average frame time and how many stacks are switched off, every few seconds.</summary>
         private void LogFrameTime()
         {
+            if (_framesToLog > 0)
+            {
+                _framesToLog--;
+                EditorLog.Debug("Editor: frame after loading took " + (1000f * Time.unscaledDeltaTime).ToString("0") + " ms.");
+            }
+
             _frames++;
             _frameTime += Time.unscaledDeltaTime;
             var now = Time.unscaledTime;
@@ -530,6 +625,36 @@ namespace Assets.Scripts
             catch (Exception e)
             {
                 EditorLog.Error("Couldn't check the blocks after a variable change: " + e);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Times the stock program load and, right after it, runs the editor's first culling pass, before the new
+    /// blocks get their first frame (and lay out). Losing it only loses that head start.
+    /// </summary>
+    [HarmonyPatch]
+    public static class EditorCullingLoadPatch
+    {
+        private static IEnumerable<MethodBase> TargetMethods()
+        {
+            yield return AccessTools.Method(typeof(VizzyUIScript), "LoadFlightProgram", new[] { typeof(System.Xml.Linq.XElement), typeof(bool), typeof(bool), typeof(Vector2) });
+        }
+
+        private static void Prefix(out System.Diagnostics.Stopwatch __state)
+        {
+            __state = System.Diagnostics.Stopwatch.StartNew();
+        }
+
+        private static void Postfix(VizzyUIScript __instance, System.Diagnostics.Stopwatch __state)
+        {
+            try
+            {
+                EditorCulling.AfterLoad(__instance, __state == null ? -1 : __state.ElapsedMilliseconds);
+            }
+            catch (Exception e)
+            {
+                EditorLog.Warning("Editor culling after loading failed: " + e.Message);
             }
         }
     }
