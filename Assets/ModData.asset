@@ -17,8 +17,8 @@ MonoBehaviour:
   _author: Dooiereier and Torifune
   _description: A general upgrade of the Vizzy user experience. Edit a running craft's
     Vizzy program in flight in the stock editor, Block Search, Funk auto-fill and
-    coloring, Jump To tagged blocks, Export Block, Clean Unused Variables, Arrange
-    MFD and Editor Culling (experimental) for large programs. Code by Dooiereier
+    coloring, Jump To tagged blocks, Export Block, Clean Unused Variables, Export
+    Image, Arrange MFD and Editor Culling for large programs. Code by Dooiereier
     and Torifune. Requires Juno Harmony.
   _loadPriority: 10
   _name: VizzyStudio
