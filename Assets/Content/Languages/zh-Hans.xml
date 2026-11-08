@@ -12,8 +12,8 @@
    <s id="VizzyStudio.Flight.KeptLatestEdit">已保留你最近的 Vizzy 编辑.{0} 可回到快速存档时的程序.</s>
    <s id="VizzyStudio.Flight.NothingToRevert">没有可撤销的 Vizzy 编辑:请先读取快速存档.</s>
    <s id="VizzyStudio.Flight.Reverted">已回到快速存档时的 Vizzy 程序.</s>
-   <s id="VizzyStudio.Editor.ApplyFailed">无法应用 Vizzy 编辑:请查看 Player.log.</s>
-   <s id="VizzyStudio.Editor.PartGoneNotApplied">带有此 Vizzy 程序的部件已不存在:编辑未应用.</s>
+   <s id="VizzyStudio.Editor.ApplyFailed">无法将 Vizzy 编辑保存到载具:请查看 Player.log.</s>
+   <s id="VizzyStudio.Editor.PartGoneNotApplied">带有此 Vizzy 程序的部件已不存在:编辑未保存.</s>
    <s id="VizzyStudio.Editor.EditDidntLoad">编辑后的 Vizzy 程序未能加载:旧程序仍在运行.</s>
    <s id="VizzyStudio.Editor.ThreadsEnded.One">1 个 Vizzy 线程已结束:它所在的块已被删除.</s>
    <s id="VizzyStudio.Editor.ThreadsEnded.Many">{0} 个 Vizzy 线程已结束:它们所在的块已被删除.</s>
@@ -186,7 +186,7 @@
    <s id="VizzyStudio.Settings.FunkAutoFill">Funk 自动补全</s>
    <s id="VizzyStudio.Settings.CheckForUpdates.Description">游戏启动时,从 SimpleRockets.com 上的模组页面读取最新版本,如果更新,则询问是否打开该页面.不会自动下载任何内容.</s>
    <s id="VizzyStudio.Settings.DebugLogging.Description">将线程位置和其他细节写入 Player.log.</s>
-   <s id="VizzyStudio.Settings.Key.Description">与下方的修饰键一起按下,在飞行中打开 Vizzy 编辑器.再次按下则应用编辑.</s>
+   <s id="VizzyStudio.Settings.Key.Description">与下方的修饰键一起按下,在飞行中打开 Vizzy 编辑器.再次按下则将编辑保存到载具.</s>
    <s id="VizzyStudio.Settings.Modifier.Description">与编辑器按键一起按住.</s>
    <s id="VizzyStudio.Settings.ShowFlightButtons.Description">在飞行导航面板上显示一个 Vizzy 按钮,包含重启 Vizzy 和编辑 Vizzy. 从下次飞行起生效.</s>
    <s id="VizzyStudio.Settings.ArrangeMfd.Description">在飞行按钮中添加排列 MFD: 移动,调整大小和旋转自定义 MFD 程序的控件,然后将数值保存到程序和设计器的工作副本中.从下次飞行起生效.</s>
