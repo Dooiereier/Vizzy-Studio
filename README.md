@@ -27,7 +27,7 @@ Press **Option+A** (Alt+A on Windows), use **Edit Vizzy** in the flight menu, or
 ### What to expect
 
 - Apply never restarts a program, and a newly added On Start doesn't run.
-- Apply also puts the program into the designer's working copy of the craft, so it's there when you return to the designer and on a relaunch. The saved craft isn't changed: load it to get the original back. A `.bak` of the working copy is made once per flight. A craft that wasn't launched from the designer has no working copy to change.
+- Apply also puts the program into the designer's working copy of the craft, so it's there when you return to the designer and on a relaunch. The saved craft isn't changed: load it to get the original back. The working copy is only changed where it still has the program as it was before your edit, so a change made in the designer, or another craft there, is left alone. This also works for a stage you've separated. One `.bak` keeps the working copy from before your edits. Going back to the quicksave's program doesn't change the working copy.
 - A block that has already run doesn't run again, so put values you want to tune inside a loop.
 - If you delete the block a thread is on, it continues at the next block that's left in its chain.
 - Each Apply restarts the memory of `PID`, `smooth`, `sum` and `rate` in Funk.

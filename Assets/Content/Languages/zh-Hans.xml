@@ -84,9 +84,9 @@
    <!-- Mfd -->
    <s id="VizzyStudio.Mfd.RestartQuestion">从头重启 {0} 的 MFD 程序?其控件将被移除,线程和变量将被重置.其他程序继续运行.</s>
    <!-- MfdSave -->
-   <s id="VizzyStudio.MfdSave.NoFile">仅为本次飞行保存:设计器的工作副本中没有此载具的程序.</s>
+   <s id="VizzyStudio.MfdSave.NoFile">仅为本次飞行保存:设计器的工作副本中已没有此程序.</s>
    <s id="VizzyStudio.MfdSave.WriteFailed">已为本次飞行保存,但写入设计器的工作副本失败:请查看 Player.log.</s>
-   <s id="VizzyStudio.MfdSave.SavedToWorkingCopy">已保存到运行中的程序和设计器的工作副本,并已备份.</s>
+   <s id="VizzyStudio.MfdSave.SavedToWorkingCopy">已保存到运行中的程序和设计器的工作副本.</s>
    <!-- MfdPanel -->
    <s id="VizzyStudio.Mfd.NoMfd">此部件没有 MFD.</s>
    <s id="VizzyStudio.Mfd.Widgets">控件</s>

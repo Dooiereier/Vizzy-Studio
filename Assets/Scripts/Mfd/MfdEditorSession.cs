@@ -14,7 +14,7 @@ namespace Assets.Scripts.Mfd
     /// <summary>
     /// The Arrange MFD panel for one MFD. The flight is held still while it's open, so a running program
     /// can't overwrite what's being typed. Edits change the live widgets at once; Save writes them into
-    /// the program and the craft's files, and closing puts back what wasn't saved.
+    /// the program and the designer's working copy, and closing puts back what wasn't saved.
     /// </summary>
     public sealed class MfdEditorSession
     {
@@ -586,7 +586,7 @@ namespace Assets.Scripts.Mfd
 
         /// <summary>
         /// The running program first, the way Edit Vizzy's Apply does it, so threads carry on and a quickload
-        /// keeps the edit. The craft's files only follow if that worked.
+        /// keeps the edit. The designer's working copy only follows if that worked.
         /// </summary>
         private void Save()
         {
@@ -622,7 +622,8 @@ namespace Assets.Scripts.Mfd
                 }
 
                 LatestEdits.Remember(CraftPrograms.Key(_data), before, program);
-                _message = CraftWorkingCopy.Write(_data, (string)before.Attribute("name"), program) ?? Text.Get("VizzyStudio.MfdSave.SavedToWorkingCopy");
+                var written = CraftWorkingCopy.Write(_data, before, program);
+                _message = Text.Get(written == WorkingCopyResult.Written ? "VizzyStudio.MfdSave.SavedToWorkingCopy" : written == WorkingCopyResult.Failed ? "VizzyStudio.MfdSave.WriteFailed" : "VizzyStudio.MfdSave.NoFile");
 
                 if (lines.Any(line => line.Applied && line.Shared))
                 {

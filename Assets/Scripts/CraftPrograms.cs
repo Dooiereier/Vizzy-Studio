@@ -55,7 +55,7 @@ namespace Assets.Scripts
 
         public static string Key(FlightProgramData data)
         {
-            // Not the craft node: a part keeps its id when a separation or docking changes the node.
+            // Not the craft node, which separation and docking change. They can renumber the parts too, so LatestEdits finds a history by its program first.
             return data.Part.Id.ToString();
         }
     }

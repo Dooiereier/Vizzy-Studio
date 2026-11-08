@@ -6,68 +6,88 @@ namespace Assets.Scripts
     using System.Xml.Linq;
     using Assets.Scripts.Craft.Parts.Modifiers;
 
+    /// <summary>What became of a write to the designer's working copy.</summary>
+    public enum WorkingCopyResult
+    {
+        Written,
+        NotFound,
+        Failed,
+    }
+
     /// <summary>
     /// Puts a program edited in flight into the designer's working copy of the craft (what the designer shows and
     /// a relaunch uses), so it's there on return to the designer. The saved craft is left alone: loading it
-    /// gets the original back. One backup per flight, made before that flight's first write.
+    /// gets the original back. The working copy is whatever is in the designer now, which needn't be this flight's
+    /// craft, so a program is only replaced where it's still exactly the one this edit started from. That also
+    /// finds it after staging, when a separated piece has no craft name and its parts have new ids.
     /// </summary>
     public static class CraftWorkingCopy
     {
-        private static object _backupFlight;
+        // The working copy as this last wrote it. A backup is only made of anything else, so it keeps the
+        // version from before the edits through any number of Applies, quickloads and relaunches.
+        private static int _lastWritten;
 
-        /// <summary>Why it couldn't be written, for the player, or null when it was.</summary>
-        public static string Write(FlightProgramData data, string programName, XElement program)
+        public static WorkingCopyResult Write(FlightProgramData data, XElement before, XElement program)
         {
             try
             {
                 var designs = Game.Instance.CraftDesigns;
                 var id = CraftDesigns.EditorCraftId;
-                var craftName = data.Part.PartScript.CraftScript.Data.Name;
                 if (string.IsNullOrEmpty(id) || !designs.HasCraft(id) || CraftDesigns.IsStock(id))
                 {
-                    return Text.Get("VizzyStudio.MfdSave.NoFile");
+                    return WorkingCopyResult.NotFound;
                 }
 
                 // A copy: the game keeps the working copy's XML in memory.
                 var craft = new XElement(designs.GetCraftDesign(id));
 
-                // The working copy holds another craft when this flight didn't start from the designer.
-                var target = (string)craft.Attribute("name") == craftName ? FindProgram(craft, programName, data.Part.Id) : null;
-                if (target == null || target.Name != program.Name)
+                // A separated piece has no name of its own; one that has must be the craft in the designer.
+                var craftName = data.Part.PartScript.CraftScript.Data.Name;
+                if (!string.IsNullOrEmpty(craftName) && (string)craft.Attribute("name") != craftName)
                 {
-                    EditorLog.Debug("Working copy not changed: it doesn't hold this craft's program " + programName + ".");
-                    return Text.Get("VizzyStudio.MfdSave.NoFile");
+                    EditorLog.Debug("Working copy not changed: it holds another craft.");
+                    return WorkingCopyResult.NotFound;
                 }
 
-                target.ReplaceWith(new XElement(program));
-                if (!ReferenceEquals(_backupFlight, Game.Instance.FlightScene))
+                var target = FindProgram(craft, before, data.Part.Id);
+                if (target == null)
+                {
+                    EditorLog.Debug("Working copy not changed: no part there has this program as it was before the edit.");
+                    return WorkingCopyResult.NotFound;
+                }
+
+                if (Fingerprint(craft) != _lastWritten)
                 {
                     var file = designs.GetCraftFile(id);
                     File.Copy(file.FullName, file.FullName + ".bak", true);
-                    _backupFlight = Game.Instance.FlightScene;
                 }
 
+                target.ReplaceWith(new XElement(program));
                 designs.SaveCraft(id, craft);
-                EditorLog.Debug("Wrote program " + programName + " to the working copy.");
-                return null;
+                _lastWritten = Fingerprint(craft);
+                EditorLog.Debug("Wrote the program to the working copy.");
+                return WorkingCopyResult.Written;
             }
             catch (Exception e)
             {
                 EditorLog.Error("Couldn't write the working copy: " + e);
-                return Text.Get("VizzyStudio.MfdSave.WriteFailed");
+                return WorkingCopyResult.Failed;
             }
         }
 
-        /// <summary>By name; the part's id only settles it when several parts have that program.</summary>
-        private static XElement FindProgram(XElement craft, string name, int partId)
+        /// <summary>The program identical to the one being replaced. Several alike: the part's id settles it, or none is chosen.</summary>
+        private static XElement FindProgram(XElement craft, XElement before, int partId)
         {
-            var programs = craft.Descendants("Program").Where(item => (string)item.Attribute("name") == name).ToList();
-            if (programs.Count <= 1)
-            {
-                return programs.FirstOrDefault();
-            }
+            var wanted = ThreadRemapper.WithoutWhitespace(before);
+            var programs = craft.Descendants("Program").Where(item => XNode.DeepEquals(ThreadRemapper.WithoutWhitespace(item), wanted)).ToList();
+            return programs.Count <= 1
+                ? programs.FirstOrDefault()
+                : programs.FirstOrDefault(item => (string)item.Ancestors("Part").FirstOrDefault()?.Attribute("id") == partId.ToString());
+        }
 
-            return programs.FirstOrDefault(item => (string)item.Ancestors("Part").FirstOrDefault()?.Attribute("id") == partId.ToString());
+        private static int Fingerprint(XElement craft)
+        {
+            return craft.ToString(SaveOptions.DisableFormatting).GetHashCode();
         }
     }
 }

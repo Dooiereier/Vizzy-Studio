@@ -84,9 +84,9 @@
    <!-- Mfd -->
    <s id="VizzyStudio.Mfd.RestartQuestion">Restart {0}'s MFD program from the top? Its widgets are removed and its threads and variables reset. Other programs keep running.</s>
    <!-- MfdSave -->
-   <s id="VizzyStudio.MfdSave.NoFile">Saved for this flight only: the designer's working copy doesn't hold this craft's program.</s>
+   <s id="VizzyStudio.MfdSave.NoFile">Saved for this flight only: the designer's working copy no longer has this program.</s>
    <s id="VizzyStudio.MfdSave.WriteFailed">Saved for this flight, but writing the designer's working copy failed: see Player.log.</s>
-   <s id="VizzyStudio.MfdSave.SavedToWorkingCopy">Saved to the running program and the designer's working copy, with a backup.</s>
+   <s id="VizzyStudio.MfdSave.SavedToWorkingCopy">Saved to the running program and the designer's working copy.</s>
    <!-- MfdPanel -->
    <s id="VizzyStudio.Mfd.NoMfd">This part has no MFD.</s>
    <s id="VizzyStudio.Mfd.Widgets">Widgets</s>

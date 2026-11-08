@@ -187,8 +187,8 @@ namespace Assets.Scripts
                     LatestEdits.Remember(_key, before, newProgram);
 
                     // The designer gets it too; only a failed write is worth a word, as many flights have no working copy.
-                    var written = CraftWorkingCopy.Write(_data, (string)before.Attribute("name"), newProgram);
-                    _closingMessage = message ?? (written == Text.Get("VizzyStudio.MfdSave.WriteFailed") ? written : null);
+                    var failed = CraftWorkingCopy.Write(_data, before, newProgram) == WorkingCopyResult.Failed ? Text.Get("VizzyStudio.MfdSave.WriteFailed") : null;
+                    _closingMessage = message != null && failed != null ? message + " " + failed : message ?? failed;
                 }
                 else
                 {

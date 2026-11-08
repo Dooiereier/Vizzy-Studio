@@ -84,9 +84,9 @@
    <!-- Mfd -->
    <s id="VizzyStudio.Mfd.RestartQuestion">Reiniciar o programa de MFD de {0} desde o início? Os widgets são removidos e as threads e variáveis são repostas. Os outros programas continuam a correr.</s>
    <!-- MfdSave -->
-   <s id="VizzyStudio.MfdSave.NoFile">Guardado só para este voo: a cópia de trabalho do editor não contém o programa deste veículo.</s>
+   <s id="VizzyStudio.MfdSave.NoFile">Guardado só para este voo: a cópia de trabalho do editor já não tem este programa.</s>
    <s id="VizzyStudio.MfdSave.WriteFailed">Guardado para este voo, mas a escrita da cópia de trabalho do editor falhou: vê o Player.log.</s>
-   <s id="VizzyStudio.MfdSave.SavedToWorkingCopy">Guardado no programa em execução e na cópia de trabalho do editor, com uma cópia de segurança.</s>
+   <s id="VizzyStudio.MfdSave.SavedToWorkingCopy">Guardado no programa em execução e na cópia de trabalho do editor.</s>
    <!-- MfdPanel -->
    <s id="VizzyStudio.Mfd.NoMfd">Esta peça não tem MFD.</s>
    <s id="VizzyStudio.Mfd.Widgets">Widgets</s>
