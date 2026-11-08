@@ -286,7 +286,7 @@ namespace Assets.Scripts
                 _listField = _field;
             }
 
-            _list.Show(_field, _completion.Suggestions, _selected);
+            _list.Show(_field, _completion.Suggestions, _selected, _completion.Start);
         }
 
         private void Close()

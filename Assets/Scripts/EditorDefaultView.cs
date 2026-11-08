@@ -76,6 +76,17 @@ namespace Assets.Scripts
             }
         }
 
+        // Clears the mark even when the Load menu's handler throws, so a later Undo doesn't reset the view.
+        private static Exception Finalizer(Exception __exception, MethodBase __originalMethod)
+        {
+            if (__originalMethod.DeclaringType == typeof(LoadProgramViewModel))
+            {
+                _fromMenu = false;
+            }
+
+            return __exception;
+        }
+
         private static void Postfix(object __instance, object[] __args, MethodBase __originalMethod)
         {
             if (__originalMethod.DeclaringType == typeof(LoadProgramViewModel))

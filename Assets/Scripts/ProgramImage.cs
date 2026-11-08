@@ -26,6 +26,7 @@ namespace Assets.Scripts
         private const int TilesPerFrame = 4;
         private const float Padding = 40f;
         private const long MaxPixels = 400L * 1000 * 1000;
+        private const float MaxWidth = 32768f;
 
         // Far from anything the game draws, so our camera sees only our canvas.
         private static readonly Vector3 Origin = new Vector3(0f, -200000f, 0f);
@@ -43,7 +44,10 @@ namespace Assets.Scripts
         private TextMeshProUGUI _blockerText;
         private RenderTexture _target;
         private Texture2D _readBack;
-        private readonly byte[] _tile = new byte[TileWidth * TileHeight * 3];
+        private byte[] _tile;
+        private Quaternion _localRotation;
+        private VizzyUIScript _editor;
+        private bool _editorDisabled;
         private PngStreamWriter _png;
         private FileStream _file;
         private string _path;
@@ -72,7 +76,34 @@ namespace Assets.Scripts
             image.StartCoroutine(image.Run());
         }
 
+        /// <summary>
+        /// The capture, with a guarantee: whatever happens, even an exception between the guarded steps, the
+        /// program goes back, the blocker goes and culling resumes (a coroutine that throws just stops).
+        /// </summary>
         private IEnumerator Run()
+        {
+            var steps = this.RunSteps();
+            try
+            {
+                while (steps.MoveNext())
+                {
+                    yield return steps.Current;
+                }
+            }
+            finally
+            {
+                if (_running == this)
+                {
+                    this.End(true);
+                    if (_controller != null)
+                    {
+                        _controller.ShowMessage(Text.Get("VizzyStudio.Image.Failed"), 5f);
+                    }
+                }
+            }
+        }
+
+        private IEnumerator RunSteps()
         {
             var total = Stopwatch.StartNew();
             var program = (_controller.VizzyUI as VizzyUIScript)?.ProgramTransform as RectTransform;
@@ -125,6 +156,9 @@ namespace Assets.Scripts
                 {
                     scale = (float)Math.Sqrt(MaxPixels / pixels);
                 }
+
+                // The band buffers grow with the width alone, so a very wide program is scaled down too.
+                scale = Mathf.Min(scale, MaxWidth / box.width);
 
                 width = Mathf.Max(1, Mathf.CeilToInt(box.width * scale));
                 height = Mathf.Max(1, Mathf.CeilToInt(box.height * scale));
@@ -237,6 +271,11 @@ namespace Assets.Scripts
 
                         for (var y = 0; y < rowsInBand; y++)
                         {
+                            if (_cancelled)
+                            {
+                                return;
+                            }
+
                             if (counting)
                             {
                                 if (y % 2 == 0)
@@ -304,6 +343,16 @@ namespace Assets.Scripts
         private void Begin(RectTransform program)
         {
             _program = program;
+
+            // The stock editor's Update handles Undo and Redo (it only checks for dialogs and text input), which
+            // would reload the program while it's moved: it's switched off for the capture.
+            _editor = _controller.VizzyUI as VizzyUIScript;
+            if (_editor != null && _editor.enabled)
+            {
+                _editor.enabled = false;
+                _editorDisabled = true;
+            }
+
             _culling = _controller.GetComponent<EditorCulling>();
             if (_culling != null)
             {
@@ -381,11 +430,13 @@ namespace Assets.Scripts
             camera.aspect = TileWidth / (float)TileHeight;
             canvas.worldCamera = camera;
             _readBack = new Texture2D(TileWidth, TileHeight, TextureFormat.RGB24, false);
+            _tile = new byte[TileWidth * TileHeight * 3];
 
             _parent = program.parent;
             _siblingIndex = program.GetSiblingIndex();
             _localPosition = program.localPosition;
             _localScale = program.localScale;
+            _localRotation = program.localRotation;
             program.SetParent(_captureRoot.transform, false);
             _moved = true;
             program.localScale = new Vector3(scale, scale, 1f);
@@ -500,19 +551,38 @@ namespace Assets.Scripts
         /// <summary>Everything back as it was; an unfinished file is deleted.</summary>
         private void End(bool failed)
         {
-            // The background thread may still be writing: it stops at its next band, and the file is closed
-            // only once it has (or right away if it's done).
+            // The background thread may still be writing: it stops at its next row, and the encoder and file
+            // are closed and an unfinished file deleted after it, on that thread, without the game waiting.
             _cancelled = true;
-            if (_work != null && !_work.IsCompleted)
+            var png = _png;
+            var file = _file;
+            var unfinished = failed ? _path : null;
+            _png = null;
+            _file = null;
+            Action close = () =>
             {
                 try
                 {
-                    _work.Wait(5000);
+                    png?.Dispose();
+                    file?.Dispose();
+                    if (unfinished != null)
+                    {
+                        File.Delete(unfinished);
+                    }
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    // Its failure is already reported, or doesn't matter while giving up.
+                    EditorLog.Warning("Couldn't close or delete the unfinished image " + unfinished + ": " + e.Message);
                 }
+            };
+
+            if (_work != null && !_work.IsCompleted)
+            {
+                _work.ContinueWith(previous => close());
+            }
+            else
+            {
+                close();
             }
 
             _work = null;
@@ -521,28 +591,19 @@ namespace Assets.Scripts
                 _program.SetParent(_parent, false);
                 _program.SetSiblingIndex(_siblingIndex);
                 _program.localScale = _localScale;
+                _program.localRotation = _localRotation;
                 _program.localPosition = _localPosition;
             }
 
             _moved = false;
-            Discard(ref _png);
-            if (_file != null)
+            _tile = null;
+            if (_editorDisabled && _editor != null)
             {
-                _file.Dispose();
-                _file = null;
-                if (failed && _path != null)
-                {
-                    try
-                    {
-                        File.Delete(_path);
-                    }
-                    catch (Exception e)
-                    {
-                        EditorLog.Warning("Couldn't delete the unfinished image " + _path + ": " + e.Message);
-                    }
-                }
+                _editor.enabled = true;
             }
 
+            _editorDisabled = false;
+            _editor = null;
             if (_target != null)
             {
                 _target.Release();
@@ -579,12 +640,6 @@ namespace Assets.Scripts
             {
                 _running = null;
             }
-        }
-
-        private static void Discard(ref PngStreamWriter png)
-        {
-            png?.Dispose();
-            png = null;
         }
 
         private void OnDisable()

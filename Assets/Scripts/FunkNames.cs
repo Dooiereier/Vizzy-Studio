@@ -100,20 +100,52 @@ namespace Assets.Scripts
 
         private static readonly HashSet<string> ArithmeticOperators = new HashSet<string> { "+", "-", "*", "/" };
 
-        private static readonly HashSet<string> VectorProperties = new HashSet<string>
+        // Only if the game's own registry can't be read: the common vector properties.
+        private static readonly HashSet<string> FallbackVectorProperties = new HashSet<string>
         {
-            "Nav.Position", "Nav.CraftDirection", "Nav.CraftUp", "Nav.North",
-            "Vel.SurfaceVelocity", "Vel.OrbitVelocity", "Vel.TargetVelocity", "Vel.Gravity", "Vel.Drag", "Vel.Acceleration", "Vel.AngularVelocity",
+            "Nav.Position", "Nav.CraftDirection", "Nav.CraftRight", "Nav.CraftUp", "Nav.North", "Nav.East",
+            "Vel.SurfaceVelocity", "Vel.OrbitVelocity", "Vel.Gravity", "Vel.Drag", "Vel.Acceleration", "Vel.AngularVelocity",
+            "Target.Position", "Target.Velocity", "Craft.Position", "Craft.Velocity", "Part.Position",
         };
+
+        /// <summary>
+        /// Whether a craft property gives a vector, from the type the game registers it with
+        /// (CraftProperties.GetProperty(xmlName).ItemType), so every property counts, including future ones.
+        /// </summary>
+        private static bool IsVectorProperty(string property)
+        {
+            try
+            {
+                var registered = CraftProperties.GetProperty(property);
+                if (registered != null)
+                {
+                    return registered.ItemType == ListItemInfoType.Vector;
+                }
+            }
+            catch (Exception)
+            {
+                // An older or changed game: the fallback list below.
+            }
+
+            return FallbackVectorProperties.Contains(property);
+        }
 
         private static readonly FieldInfo CraftPropertyField = typeof(CraftPropertyExpression).GetField("_property", BindingFlags.Instance | BindingFlags.NonPublic);
 
-        /// <summary>Variables the program sets to something that's certainly a vector, including through other variables.</summary>
+        /// <summary>Variables the program reads as v:name or sets to something that's certainly a vector, including through other variables.</summary>
         public static HashSet<string> VectorVariables(VizzyUIScript editor)
         {
             var sets = new List<(string name, ProgramNode value)>();
+
+            // A variable the program itself reads as v:name is a vector, however it gets its value.
+            var vectors = new HashSet<string>(StringComparer.Ordinal);
             void Collect(ProgramNode node)
             {
+                if (node is EvaluationExpression funk && funk.GetExpression(0) is ConstantExpression text)
+                {
+                    vectors.UnionWith(FunkCompletion.VectorNamesIn(text.ExpressionResult.TextValue));
+                }
+
                 if (node is SetVariableInstruction && node.Expressions != null && node.Expressions.Count > 1)
                 {
                     var name = node.Expressions[0] is VariableExpression variable ? variable.VariableName : TypedVariableName(node);
@@ -134,20 +166,19 @@ namespace Assets.Scripts
                 Walk(root, Collect);
             }
 
-            var vectors = new HashSet<string>(StringComparer.Ordinal);
             for (var changed = true; changed;)
             {
                 changed = false;
                 foreach (var (name, value) in sets)
                 {
-                    changed |= IsVector(value, vectors) && vectors.Add(name);
+                    changed |= IsVector(value, vectors, editor.FlightProgram, 0) && vectors.Add(name);
                 }
             }
 
             return vectors;
         }
 
-        private static bool IsVector(ProgramNode node, HashSet<string> vectors)
+        private static bool IsVector(ProgramNode node, HashSet<string> vectors, FlightProgram program, int depth)
         {
             switch (node)
             {
@@ -156,15 +187,19 @@ namespace Assets.Scripts
                 case VectorOperatorExpression operation:
                     return VectorOperators.Contains(operation.Operator);
                 case VariableExpression variable:
-                    return variable.VariableName != null && vectors.Contains(variable.VariableName);
+                    return !variable.IsLocal && variable.VariableName != null && vectors.Contains(variable.VariableName);
+                case CallCustomExpression call:
+                    // What the custom expression returns; the depth stops custom expressions that call each other.
+                    var custom = depth < 16 ? program?.GetCustomExpression(call.Call) : null;
+                    return custom?.Expressions != null && custom.Expressions.Count > 0 && IsVector(custom.Expressions[0], vectors, program, depth + 1);
                 case BinaryOperatorExpression binary:
                     return ArithmeticOperators.Contains(binary.Operator)
-                        && (IsVector(binary.ExpressionA, vectors) || IsVector(binary.ExpressionB, vectors));
+                        && (IsVector(binary.ExpressionA, vectors, program, depth) || IsVector(binary.ExpressionB, vectors, program, depth));
                 case ConditionalExpression conditional:
                     return conditional.Expressions != null && conditional.Expressions.Count > 2
-                        && (IsVector(conditional.Expressions[1], vectors) || IsVector(conditional.Expressions[2], vectors));
+                        && (IsVector(conditional.Expressions[1], vectors, program, depth) || IsVector(conditional.Expressions[2], vectors, program, depth));
                 case CraftPropertyExpression _:
-                    return CraftPropertyField?.GetValue(node) is string property && VectorProperties.Contains(property);
+                    return CraftPropertyField?.GetValue(node) is string property && IsVectorProperty(property);
                 case EvaluationExpression funk:
                     return funk.GetExpression(0) is ConstantExpression text && FunkCompletion.IsVectorFunk(text.ExpressionResult.TextValue, VectorDataNames);
                 default:

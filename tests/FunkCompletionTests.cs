@@ -30,6 +30,11 @@ public static class FunkCompletionTests
         check("FD. filters", Names("FD.Alt").SequenceEqual(new[] { "FD.AltitudeAboveSeaLevel" }));
         check("v: lists variables", Names("v:").SequenceEqual(new[] { "v:Kp", "v:Target" }));
         check("OD. lists orbit data", Names("OD.In").SequenceEqual(new[] { "OD.Inclination" }));
+        check("fd. in lower case filters too", Names("fd.alt").SequenceEqual(new[] { "FD.AltitudeAboveSeaLevel" }));
+        check("od. in lower case filters too", Names("od.in").SequenceEqual(new[] { "OD.Inclination" }));
+        check("a lower-case complete name is still offered in its own case", Names("fd.pitch").SequenceEqual(new[] { "FD.Pitch" }));
+        var lower = FunkCompletion.Find("1 + fd.alt", 10, catalog, null, null);
+        check("fd. is replaced by FD.", lower.Apply("1 + fd.alt", lower.Suggestions.First(), out _) == "1 + FD.AltitudeAboveSeaLevel");
         check("flight names appear with their prefix", Names("Alt").Contains("FD.AltitudeAboveSeaLevel"));
         check("flight names wait for two letters", !Names("A").Contains("FD.AltitudeAboveSeaLevel"));
         check("start-of-name beats contains", Names("t").IndexOf("Throttle") < Names("t").IndexOf("Pitch"));
@@ -41,6 +46,11 @@ public static class FunkCompletionTests
         check("nothing for an empty word", Find("clamp(") == null);
         check("part references aren't offered", Find("Tank.Fuel") == null);
         check("nothing once the word is complete", Find("FD.AltitudeAboveSeaLevel") == null);
+
+        check("v:name counts as a vector", FunkCompletion.VectorNamesIn("dot(FD.Position, v:LaunchPlaneNormal) + v:B").SequenceEqual(new[] { "LaunchPlaneNormal", "B" }));
+        check("v: inside quotes doesn't count", !FunkCompletion.VectorNamesIn("\"v:Text\" + 1").Any());
+        check("no v: gives no vectors", !FunkCompletion.VectorNamesIn("Kp * 2").Any());
+        check("the end of another name isn't v:", !FunkCompletion.VectorNamesIn("Nav:Thing").Any());
 
         var names = FunkCompletion.NamesIn("PID(Target, FD.Pitch, v:Gain, 0) + listNum(\"my list\", 1) + [Space Capsule.VZ.other var] + Part.VZ.far").ToList();
         check("a plain variable counts as used", names.Contains("Target"));
