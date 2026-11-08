@@ -2,7 +2,7 @@
 
 A mod for [Juno: New Origins](https://www.simplerockets.com/) that lets you edit a running craft's Vizzy program in flight, in the game's own editor, without restarting the program.
 
-Pause, change a PID gain, apply, and the program carries on from where it was. Quickload and the latest edit is still there, with threads back at their quicksave positions, so you can tune the same phase of flight over and over.
+Pause, change a PID gain, save to craft, and the program carries on from where it was. Quickload and the latest edit is still there, with threads back at their quicksave positions, so you can tune the same phase of flight over and over.
 
 VizzyStudio is still in development and has no release yet. It also includes the features of Vizzy Debugger, Vizzy Exporter and Vizzy McBlinky, so turn those mods off when using it.
 
@@ -18,7 +18,7 @@ Crafts never need the mod: their programs stay ordinary Vizzy.
 Press **Option+A** (Alt+A on Windows), use **Edit Vizzy** in the flight menu, or use the Vizzy button at the bottom of the right-hand bar. The flight pauses while you edit.
 
 - With a part selected, its program opens straight away. Otherwise you choose from the craft's programs, or the only one opens. In the list, the one you opened last is blue: Up and Down move the selection, Enter opens it.
-- **Option+A** in the editor applies your edit and returns to flight, and the editor reopens where you left it.
+- **Option+A** in the editor does Save to Craft and returns to flight, and the editor reopens where you left it.
 - **Option+Shift+A** returns to the quicksave's program.
 - The letter and the modifier are settings. Shift and Ctrl also change the throttle in the game's flight controls, which is why Option/Alt is the default.
 - **Restart Vizzy**, on the same button, restarts a program, and it asks first. For an MFD it also removes the widgets, so the program builds its screen again.
@@ -26,11 +26,11 @@ Press **Option+A** (Alt+A on Windows), use **Edit Vizzy** in the flight menu, or
 
 ### What to expect
 
-- Apply never restarts a program, and a newly added On Start doesn't run.
-- Apply also puts the program into the designer's working copy of the craft, so it's there when you return to the designer and on a relaunch. The saved craft isn't changed: load it to get the original back. The working copy is only changed where it still has the program as it was before your edit, so a change made in the designer, or another craft there, is left alone. This also works for a stage you've separated. One `.bak` keeps the working copy from before your edits. Going back to the quicksave's program doesn't change the working copy.
+- **Save to Craft** never restarts a program, and a newly added On Start doesn't run.
+- Save to Craft also puts the program into the designer's working copy of the craft, so it's there when you return to the designer and on a relaunch. The saved craft isn't changed: load it to get the original back. The working copy is only changed where it still has the program as it was before your edit, so a change made in the designer, or another craft there, is left alone. This also works for a stage you've separated. One `.bak` keeps the working copy from before your edits. Going back to the quicksave's program doesn't change the working copy.
 - A block that has already run doesn't run again, so put values you want to tune inside a loop.
 - If you delete the block a thread is on, it continues at the next block that's left in its chain.
-- Each Apply restarts the memory of `PID`, `smooth`, `sum` and `rate` in Funk.
+- Each Save to Craft restarts the memory of `PID`, `smooth`, `sum` and `rate` in Funk.
 - Renaming a variable while it's in use loses its running value.
 
 ### Arrange MFD
@@ -57,7 +57,7 @@ The update check reads the latest version from the mod's page once per game star
 
 ## Large programs
 
-The game's Vizzy editor gives every block and text field its own per-frame update, even far off screen, so large programs get slow to edit. **Editor Culling** (on by default) pauses that work for whole stacks more than half a view outside the screen and switches them back on as they come near. After a program loads it waits until the program is fully built. Renaming, deleting, Undo and saving still reach every block. It stays off if another mod changes the Vizzy editor. With Debug Logging on, `Player.log` shows the frame time and how many blocks are paused every few seconds, and how long loading, saving and Apply take, so you can compare it on and off.
+The game's Vizzy editor gives every block and text field its own per-frame update, even far off screen, so large programs get slow to edit. **Editor Culling** (on by default) pauses that work for whole stacks more than half a view outside the screen and switches them back on as they come near. After a program loads it waits until the program is fully built. Renaming, deleting, Undo and saving still reach every block. It stays off if another mod changes the Vizzy editor. With Debug Logging on, `Player.log` shows the frame time and how many blocks are paused every few seconds, so you can compare it on and off.
 
 ## Languages
 

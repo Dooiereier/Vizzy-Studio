@@ -12,8 +12,8 @@
    <s id="VizzyStudio.Flight.KeptLatestEdit">Kept your latest Vizzy edit. {0} goes back to the quicksave's program.</s>
    <s id="VizzyStudio.Flight.NothingToRevert">No kept Vizzy edit to undo: load a quicksave first.</s>
    <s id="VizzyStudio.Flight.Reverted">Back to the quicksave's Vizzy program.</s>
-   <s id="VizzyStudio.Editor.ApplyFailed">Couldn't apply the Vizzy edit: see Player.log.</s>
-   <s id="VizzyStudio.Editor.PartGoneNotApplied">The part with this Vizzy program is gone: the edit wasn't applied.</s>
+   <s id="VizzyStudio.Editor.ApplyFailed">Couldn't save the Vizzy edit to the craft: see Player.log.</s>
+   <s id="VizzyStudio.Editor.PartGoneNotApplied">The part with this Vizzy program is gone: the edit wasn't saved.</s>
    <s id="VizzyStudio.Editor.EditDidntLoad">The edited Vizzy program didn't load: the old one is still running.</s>
    <s id="VizzyStudio.Editor.ThreadsEnded.One">1 Vizzy thread ended: its block was deleted.</s>
    <s id="VizzyStudio.Editor.ThreadsEnded.Many">{0} Vizzy threads ended: their blocks were deleted.</s>
@@ -186,7 +186,7 @@
    <s id="VizzyStudio.Settings.FunkAutoFill">Funk Auto-Fill</s>
    <s id="VizzyStudio.Settings.CheckForUpdates.Description">At game start, reads the latest version from the mod's SimpleRockets.com page and, if it's newer, offers to open the page. Nothing is downloaded automatically.</s>
    <s id="VizzyStudio.Settings.DebugLogging.Description">Writes thread positions and other details to Player.log.</s>
-   <s id="VizzyStudio.Settings.Key.Description">With the modifier below, opens the Vizzy editor in flight. Pressed again, it applies the edit.</s>
+   <s id="VizzyStudio.Settings.Key.Description">With the modifier below, opens the Vizzy editor in flight. Pressed again, it saves the edit to the craft.</s>
    <s id="VizzyStudio.Settings.Modifier.Description">Held with the editor key.</s>
    <s id="VizzyStudio.Settings.ShowFlightButtons.Description">Shows a Vizzy button on the flight nav panel, with Restart Vizzy and Edit Vizzy. Applies from the next flight.</s>
    <s id="VizzyStudio.Settings.ArrangeMfd.Description">Adds Arrange MFD to the flight buttons: move, resize and rotate the widgets of a custom MFD program, then save the values into the program and the designer's working copy. Applies from the next flight.</s>

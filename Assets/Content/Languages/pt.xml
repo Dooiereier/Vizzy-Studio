@@ -12,8 +12,8 @@
    <s id="VizzyStudio.Flight.KeptLatestEdit">A tua última edição Vizzy foi mantida. {0} volta ao programa da gravação rápida.</s>
    <s id="VizzyStudio.Flight.NothingToRevert">Não há nenhuma edição Vizzy guardada para desfazer: carrega primeiro uma gravação rápida.</s>
    <s id="VizzyStudio.Flight.Reverted">De volta ao programa Vizzy da gravação rápida.</s>
-   <s id="VizzyStudio.Editor.ApplyFailed">Não foi possível aplicar a edição Vizzy: vê o Player.log.</s>
-   <s id="VizzyStudio.Editor.PartGoneNotApplied">A peça com este programa Vizzy já não existe: a edição não foi aplicada.</s>
+   <s id="VizzyStudio.Editor.ApplyFailed">Não foi possível guardar a edição do Vizzy no veículo: vê o Player.log.</s>
+   <s id="VizzyStudio.Editor.PartGoneNotApplied">A peça com este programa Vizzy já não existe: a edição não foi guardada.</s>
    <s id="VizzyStudio.Editor.EditDidntLoad">O programa Vizzy editado não carregou: o antigo continua a correr.</s>
    <s id="VizzyStudio.Editor.ThreadsEnded.One">1 thread Vizzy terminou: o seu bloco foi apagado.</s>
    <s id="VizzyStudio.Editor.ThreadsEnded.Many">{0} threads Vizzy terminaram: os seus blocos foram apagados.</s>
@@ -186,7 +186,7 @@
    <s id="VizzyStudio.Settings.FunkAutoFill">Preenchimento Automático Funk</s>
    <s id="VizzyStudio.Settings.CheckForUpdates.Description">Ao iniciar o jogo, lê a versão mais recente na página do mod em SimpleRockets.com e, se for mais nova, oferece-se para abrir a página. Nada é transferido automaticamente.</s>
    <s id="VizzyStudio.Settings.DebugLogging.Description">Escreve as posições das threads e outros detalhes no Player.log.</s>
-   <s id="VizzyStudio.Settings.Key.Description">Com o modificador abaixo, abre o editor Vizzy em voo. Premida de novo, aplica a edição.</s>
+   <s id="VizzyStudio.Settings.Key.Description">Com o modificador abaixo, abre o editor Vizzy em voo. Premida de novo, guarda a edição no veículo.</s>
    <s id="VizzyStudio.Settings.Modifier.Description">Mantida premida com a tecla do editor.</s>
    <s id="VizzyStudio.Settings.ShowFlightButtons.Description">Mostra um botão Vizzy no painel de navegação de voo, com Reiniciar Vizzy e Editar Vizzy. Aplica-se a partir do próximo voo.</s>
    <s id="VizzyStudio.Settings.ArrangeMfd.Description">Adiciona Organizar MFD aos botões de voo: move, redimensiona e roda os widgets de um programa de MFD personalizado e depois guarda os valores no programa e na cópia de trabalho do editor. Aplica-se a partir do próximo voo.</s>
