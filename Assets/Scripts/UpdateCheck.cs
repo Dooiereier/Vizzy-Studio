@@ -16,7 +16,7 @@ namespace Assets.Scripts
     public static class UpdateCheck
     {
         // The SimpleRockets.com listing: where the version is read and where players download. Empty skips the check.
-        private const string ModPageUrl = "";
+        private const string ModPageUrl = "https://www.simplerockets.com/Mods/View/358596";
 
         private const int TimeoutSeconds = 10;
 
