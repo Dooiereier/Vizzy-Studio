@@ -1,4 +1,4 @@
-*A general upgrade of the Vizzy user experience.*
+*A big upgrade to the Vizzy user experience.*
 
 Edit a running craft's Vizzy program in flight, in the game's own editor, without restarting it. Pause, change a PID gain, apply, and the program carries on from where it was. Quickload and your latest edit is still there, so you can tune the same phase of flight over and over. On top of that, the Vizzy editor gets search, navigation and Funk help, in the designer and in flight.
 
