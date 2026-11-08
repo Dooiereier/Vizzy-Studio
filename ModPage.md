@@ -8,7 +8,7 @@ Edit a running craft's Vizzy program in flight, in the game's own editor, withou
 * **Apply and carry on:** threads keep their place. Delete the block a thread is on and it continues at the next one.
 * **Back to the quicksave:** Option+Shift+A returns to the quicksave's program.
 * **Restart Vizzy:** restarts a program after asking. For an MFD it also clears the widgets, so the screen is built again.
-* **Arrange MFD:** move, resize and rotate the widgets of a custom MFD program on screen, then save the new values straight into the program and the craft's files. Widgets that follow the one you move go with it.
+* **Arrange MFD:** move, resize and rotate the widgets of a custom MFD program on screen, then save the new values straight into the program and the designer's copy of the craft. Widgets that follow the one you move go with it.
 
 ###In the Vizzy editor
 

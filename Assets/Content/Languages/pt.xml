@@ -84,15 +84,9 @@
    <!-- Mfd -->
    <s id="VizzyStudio.Mfd.RestartQuestion">Reiniciar o programa de MFD de {0} desde o início? Os widgets são removidos e as threads e variáveis são repostas. Os outros programas continuam a correr.</s>
    <!-- MfdSave -->
-   <s id="VizzyStudio.MfdSave.FileDiffers">Guardado só para este voo: o ficheiro do veículo {0} tem outro programa, por exemplo depois de uma alteração no editor ou no Editar Vizzy. Nenhum ficheiro foi alterado.</s>
-   <s id="VizzyStudio.MfdSave.NoFile">Guardado só para este voo: não foi encontrado nenhum ficheiro de veículo com este programa.</s>
-   <s id="VizzyStudio.MfdSave.WriteFailed">Guardado para este voo, mas a escrita dos ficheiros do veículo falhou: vê o Player.log.</s>
-   <s id="VizzyStudio.MfdSave.MayHoldChange">Estes podem conter a alteração, com uma cópia .bak-{0} ao lado: {1}.</s>
-   <s id="VizzyStudio.MfdSave.NoFileChanged">Nenhum ficheiro foi alterado.</s>
-   <s id="VizzyStudio.MfdSave.SavedToCraft">Guardado no programa em execução e no veículo {0}, com uma cópia de segurança.</s>
-   <s id="VizzyStudio.MfdSave.SavedToWorkingCopy">Guardado no programa em execução e na cópia de trabalho do editor, com uma cópia de segurança.</s>
-   <s id="VizzyStudio.MfdSave.DesignLacksProgram">O projeto guardado {0} não tem este programa, por isso não foi alterado: guarda o veículo no editor para manter isto.</s>
-   <s id="VizzyStudio.MfdSave.NoDesign">Este veículo não tem nenhum projeto guardado: guarda-o no editor para manter isto.</s>
+   <s id="VizzyStudio.MfdSave.NoFile">Guardado só para este voo: a cópia de trabalho do editor já não tem este programa.</s>
+   <s id="VizzyStudio.MfdSave.WriteFailed">Guardado para este voo, mas a escrita da cópia de trabalho do editor falhou: vê o Player.log.</s>
+   <s id="VizzyStudio.MfdSave.SavedToWorkingCopy">Guardado no programa em execução e na cópia de trabalho do editor.</s>
    <!-- MfdPanel -->
    <s id="VizzyStudio.Mfd.NoMfd">Esta peça não tem MFD.</s>
    <s id="VizzyStudio.Mfd.Widgets">Widgets</s>
@@ -195,7 +189,7 @@
    <s id="VizzyStudio.Settings.Key.Description">Com o modificador abaixo, abre o editor Vizzy em voo. Premida de novo, aplica a edição.</s>
    <s id="VizzyStudio.Settings.Modifier.Description">Mantida premida com a tecla do editor.</s>
    <s id="VizzyStudio.Settings.ShowFlightButtons.Description">Mostra um botão Vizzy no painel de navegação de voo, com Reiniciar Vizzy e Editar Vizzy. Aplica-se a partir do próximo voo.</s>
-   <s id="VizzyStudio.Settings.ArrangeMfd.Description">Adiciona Organizar MFD aos botões de voo: move, redimensiona e roda os widgets de um programa de MFD personalizado e depois guarda os valores no programa. Guardar também altera os ficheiros do veículo, depois de fazer cópias de segurança. Aplica-se a partir do próximo voo.</s>
+   <s id="VizzyStudio.Settings.ArrangeMfd.Description">Adiciona Organizar MFD aos botões de voo: move, redimensiona e roda os widgets de um programa de MFD personalizado e depois guarda os valores no programa e na cópia de trabalho do editor. Aplica-se a partir do próximo voo.</s>
    <s id="VizzyStudio.Settings.EditorCulling.Description">Aumenta muito a fluidez do editor Vizzy em programas grandes, pausando os blocos longe do ecrã. Desliga-se quando outro mod altera o editor.</s>
    <s id="VizzyStudio.Settings.FunkSyntaxHighlight.Description">Colore os campos Funk e marca os erros a vermelho, no editor e em voo.</s>
    <s id="VizzyStudio.Settings.FunkAutoFill.Description">Sugere nomes Funk enquanto escreves num campo Funk, no editor e em voo. Cima e Baixo escolhem, Enter aceita, Esc fecha a lista.</s>

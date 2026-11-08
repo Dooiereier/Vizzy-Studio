@@ -10,7 +10,7 @@ namespace Assets.Scripts
 
     /// <summary>
     /// Each editor's starting view (the stock zoom and position, before a remembered view replaces it), so a
-    /// program chosen in the stock Load menu opens there instead of where the previous program was left.
+    /// program chosen in the stock Load menu, or a new one, opens there instead of where the previous program was left.
     /// </summary>
     public static class EditorDefaultView
     {
@@ -54,8 +54,8 @@ namespace Assets.Scripts
     }
 
     /// <summary>
-    /// A program loaded from the stock Load menu goes to the editor's starting view. Import (which adds to the
-    /// program) keeps the view, and so do Undo, Redo and New, which load programs too.
+    /// A program loaded from the stock Load menu, or a new one, goes to the editor's starting view. Import (which
+    /// adds to the program) keeps the view, and so do Undo and Redo, which load programs too.
     /// </summary>
     [HarmonyPatch]
     public static class LoadMenuViewPatch
@@ -65,6 +65,7 @@ namespace Assets.Scripts
         private static IEnumerable<MethodBase> TargetMethods()
         {
             yield return AccessTools.Method(typeof(LoadProgramViewModel), "OnPrimaryButtonClicked");
+            yield return AccessTools.Method(typeof(VizzyUIScript), "LoadNewFlightProgram");
             yield return AccessTools.Method(typeof(VizzyUIScript), "LoadFlightProgram", new[] { typeof(System.Xml.Linq.XElement), typeof(bool), typeof(bool), typeof(Vector2) });
         }
 
@@ -97,6 +98,12 @@ namespace Assets.Scripts
 
             try
             {
+                if (__originalMethod.Name == "LoadNewFlightProgram")
+                {
+                    EditorDefaultView.Reset(__instance as VizzyUIScript);
+                    return;
+                }
+
                 var import = __args.Length > 2 && __args[2] is bool flag && flag;
                 if (_fromMenu && !import)
                 {
