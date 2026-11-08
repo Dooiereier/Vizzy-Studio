@@ -78,7 +78,7 @@ namespace Assets.Scripts
             }
         }
 
-        public void Show(TMP_InputField field, IList<FunkSuggestion> suggestions, int selected)
+        public void Show(TMP_InputField field, IList<FunkSuggestion> suggestions, int selected, int wordStart)
         {
             var count = Mathf.Min(VisibleRows, suggestions.Count);
 
@@ -99,7 +99,7 @@ namespace Assets.Scripts
 
             var height = count * RowHeight;
             _rect.sizeDelta = new Vector2(Width, height);
-            Place(field, height);
+            Place(field, height, wordStart);
             _root.SetActive(true);
         }
 
@@ -113,8 +113,8 @@ namespace Assets.Scripts
             UnityEngine.Object.Destroy(_root);
         }
 
-        /// <summary>Under the field, or above it when there's no room below.</summary>
-        private void Place(TMP_InputField field, float height)
+        /// <summary>Under the word being typed, kept on screen; above the field when there's no room below.</summary>
+        private void Place(TMP_InputField field, float height, int wordStart)
         {
             var corners = new Vector3[4];
             ((RectTransform)field.transform).GetWorldCorners(corners);
@@ -124,8 +124,23 @@ namespace Assets.Scripts
             var bounds = parent.rect;
 
             var y = bottomLeft.y - height < bounds.yMin ? topLeft.y + height : bottomLeft.y;
-            var x = Mathf.Min(bottomLeft.x, bounds.xMax - Width);
+            var x = Mathf.Max(bottomLeft.x, WordLeft(field, wordStart, parent, bottomLeft.x));
+            x = Mathf.Max(bounds.xMin, Mathf.Min(x, bounds.xMax - Width));
             _rect.localPosition = new Vector3(x, y, 0f);
+        }
+
+        /// <summary>Where the word's first letter is, in the list's parent; the fallback if the text isn't laid out.</summary>
+        private static float WordLeft(TMP_InputField field, int wordStart, RectTransform parent, float fallback)
+        {
+            var text = field.textComponent;
+            var info = text.textInfo;
+            if (info == null || info.characterCount == 0 || wordStart < 0 || wordStart >= info.characterCount)
+            {
+                return fallback;
+            }
+
+            var world = text.transform.TransformPoint(new Vector3(info.characterInfo[wordStart].origin, 0f, 0f));
+            return parent.InverseTransformPoint(world).x;
         }
 
         private sealed class FunkListRow : MonoBehaviour, IPointerDownHandler, IPointerEnterHandler
