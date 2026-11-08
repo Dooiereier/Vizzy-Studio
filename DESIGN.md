@@ -183,7 +183,7 @@ Players' text lives in `Assets/Content/Languages/EN-US.xml` (the baseline), `pt.
 
 ## Starting view after Load
 
-`EditorDefaultView` keeps each editor's starting view (the stock zoom and position, captured just before `EditorViewMemory` or `EditorSession` restores a remembered one). `LoadMenuViewPatch` marks a load from the stock Load menu (`LoadProgramViewModel.OnPrimaryButtonClicked`), and a postfix on `LoadFlightProgram` then puts the view back to that start, unless it's an import (which adds to the program). Undo, Redo and New keep the view.
+`EditorDefaultView` keeps each editor's starting view (the stock zoom and position, captured just before `EditorViewMemory` or `EditorSession` restores a remembered one). `LoadMenuViewPatch` marks a load from the stock Load menu (`LoadProgramViewModel.OnPrimaryButtonClicked`), and a postfix on `LoadFlightProgram` then puts the view back to that start, unless it's an import (which adds to the program). A new program (`LoadNewFlightProgram`) goes there too. Undo and Redo keep the view.
 
 ## Editor culling
 
