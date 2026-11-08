@@ -171,14 +171,14 @@ namespace Assets.Scripts
                 changed = false;
                 foreach (var (name, value) in sets)
                 {
-                    changed |= IsVector(value, vectors) && vectors.Add(name);
+                    changed |= IsVector(value, vectors, editor.FlightProgram, 0) && vectors.Add(name);
                 }
             }
 
             return vectors;
         }
 
-        private static bool IsVector(ProgramNode node, HashSet<string> vectors)
+        private static bool IsVector(ProgramNode node, HashSet<string> vectors, FlightProgram program, int depth)
         {
             switch (node)
             {
@@ -187,13 +187,17 @@ namespace Assets.Scripts
                 case VectorOperatorExpression operation:
                     return VectorOperators.Contains(operation.Operator);
                 case VariableExpression variable:
-                    return variable.VariableName != null && vectors.Contains(variable.VariableName);
+                    return !variable.IsLocal && variable.VariableName != null && vectors.Contains(variable.VariableName);
+                case CallCustomExpression call:
+                    // What the custom expression returns; the depth stops custom expressions that call each other.
+                    var custom = depth < 16 ? program?.GetCustomExpression(call.Call) : null;
+                    return custom?.Expressions != null && custom.Expressions.Count > 0 && IsVector(custom.Expressions[0], vectors, program, depth + 1);
                 case BinaryOperatorExpression binary:
                     return ArithmeticOperators.Contains(binary.Operator)
-                        && (IsVector(binary.ExpressionA, vectors) || IsVector(binary.ExpressionB, vectors));
+                        && (IsVector(binary.ExpressionA, vectors, program, depth) || IsVector(binary.ExpressionB, vectors, program, depth));
                 case ConditionalExpression conditional:
                     return conditional.Expressions != null && conditional.Expressions.Count > 2
-                        && (IsVector(conditional.Expressions[1], vectors) || IsVector(conditional.Expressions[2], vectors));
+                        && (IsVector(conditional.Expressions[1], vectors, program, depth) || IsVector(conditional.Expressions[2], vectors, program, depth));
                 case CraftPropertyExpression _:
                     return CraftPropertyField?.GetValue(node) is string property && IsVectorProperty(property);
                 case EvaluationExpression funk:
