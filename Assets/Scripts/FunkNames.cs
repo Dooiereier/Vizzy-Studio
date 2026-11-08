@@ -132,12 +132,20 @@ namespace Assets.Scripts
 
         private static readonly FieldInfo CraftPropertyField = typeof(CraftPropertyExpression).GetField("_property", BindingFlags.Instance | BindingFlags.NonPublic);
 
-        /// <summary>Variables the program sets to something that's certainly a vector, including through other variables.</summary>
+        /// <summary>Variables the program reads as v:name or sets to something that's certainly a vector, including through other variables.</summary>
         public static HashSet<string> VectorVariables(VizzyUIScript editor)
         {
             var sets = new List<(string name, ProgramNode value)>();
+
+            // A variable the program itself reads as v:name is a vector, however it gets its value.
+            var vectors = new HashSet<string>(StringComparer.Ordinal);
             void Collect(ProgramNode node)
             {
+                if (node is EvaluationExpression funk && funk.GetExpression(0) is ConstantExpression text)
+                {
+                    vectors.UnionWith(FunkCompletion.VectorNamesIn(text.ExpressionResult.TextValue));
+                }
+
                 if (node is SetVariableInstruction && node.Expressions != null && node.Expressions.Count > 1)
                 {
                     var name = node.Expressions[0] is VariableExpression variable ? variable.VariableName : TypedVariableName(node);
@@ -158,7 +166,6 @@ namespace Assets.Scripts
                 Walk(root, Collect);
             }
 
-            var vectors = new HashSet<string>(StringComparer.Ordinal);
             for (var changed = true; changed;)
             {
                 changed = false;

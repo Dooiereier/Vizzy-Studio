@@ -47,6 +47,11 @@ public static class FunkCompletionTests
         check("part references aren't offered", Find("Tank.Fuel") == null);
         check("nothing once the word is complete", Find("FD.AltitudeAboveSeaLevel") == null);
 
+        check("v:name counts as a vector", FunkCompletion.VectorNamesIn("dot(FD.Position, v:LaunchPlaneNormal) + v:B").SequenceEqual(new[] { "LaunchPlaneNormal", "B" }));
+        check("v: inside quotes doesn't count", !FunkCompletion.VectorNamesIn("\"v:Text\" + 1").Any());
+        check("no v: gives no vectors", !FunkCompletion.VectorNamesIn("Kp * 2").Any());
+        check("the end of another name isn't v:", !FunkCompletion.VectorNamesIn("Nav:Thing").Any());
+
         var names = FunkCompletion.NamesIn("PID(Target, FD.Pitch, v:Gain, 0) + listNum(\"my list\", 1) + [Space Capsule.VZ.other var] + Part.VZ.far").ToList();
         check("a plain variable counts as used", names.Contains("Target"));
         check("a v: variable counts as used", names.Contains("Gain"));

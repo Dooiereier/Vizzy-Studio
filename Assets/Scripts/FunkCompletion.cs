@@ -150,6 +150,18 @@ namespace Assets.Scripts
             }
         }
 
+        /// <summary>The variables Funk text reads as vectors, by writing v:name. Text in quotes doesn't count.</summary>
+        public static IEnumerable<string> VectorNamesIn(string funk)
+        {
+            if (string.IsNullOrEmpty(funk))
+            {
+                return Enumerable.Empty<string>();
+            }
+
+            var text = Regex.Replace(funk, "\"[^\"]*\"", "\"\"");
+            return Regex.Matches(text, @"(?<![A-Za-z0-9_$.])v:([A-Za-z_$][A-Za-z0-9_$]*)").Cast<Match>().Select(match => match.Groups[1].Value).Distinct();
+        }
+
         /// <summary>Whether Funk text is certainly a vector: v:name, a vector data name, or one whole call to a function returning a vector.</summary>
         public static bool IsVectorFunk(string funk, ICollection<string> vectorData)
         {
