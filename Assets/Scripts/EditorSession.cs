@@ -184,8 +184,11 @@ namespace Assets.Scripts
                 else if (ProgramSwapper.Swap(_data, newProgram, out var message))
                 {
                     _applied = true;
-                    _closingMessage = message;
                     LatestEdits.Remember(_key, before, newProgram);
+
+                    // The designer gets it too; only a failed write is worth a word, as many flights have no working copy.
+                    var written = CraftWorkingCopy.Write(_data, (string)before.Attribute("name"), newProgram);
+                    _closingMessage = message ?? (written == Text.Get("VizzyStudio.MfdSave.WriteFailed") ? written : null);
                 }
                 else
                 {

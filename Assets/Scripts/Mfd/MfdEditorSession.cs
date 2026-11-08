@@ -622,7 +622,7 @@ namespace Assets.Scripts.Mfd
                 }
 
                 LatestEdits.Remember(CraftPrograms.Key(_data), before, program);
-                _message = MfdCraftFiles.Write(_data, changes, lines, width, height, _allowShared);
+                _message = CraftWorkingCopy.Write(_data, (string)before.Attribute("name"), program) ?? Text.Get("VizzyStudio.MfdSave.SavedToWorkingCopy");
 
                 if (lines.Any(line => line.Applied && line.Shared))
                 {

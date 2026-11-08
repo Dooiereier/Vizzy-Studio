@@ -84,15 +84,9 @@
    <!-- Mfd -->
    <s id="VizzyStudio.Mfd.RestartQuestion">Restart {0}'s MFD program from the top? Its widgets are removed and its threads and variables reset. Other programs keep running.</s>
    <!-- MfdSave -->
-   <s id="VizzyStudio.MfdSave.FileDiffers">Saved for this flight only: the craft file {0} has a different program, for example after a change in the designer or Edit Vizzy. No file was changed.</s>
-   <s id="VizzyStudio.MfdSave.NoFile">Saved for this flight only: no craft file with this program was found.</s>
-   <s id="VizzyStudio.MfdSave.WriteFailed">Saved for this flight, but writing the craft files failed: see Player.log.</s>
-   <s id="VizzyStudio.MfdSave.MayHoldChange">These may hold the change, with a .bak-{0} copy next to them: {1}.</s>
-   <s id="VizzyStudio.MfdSave.NoFileChanged">No file was changed.</s>
-   <s id="VizzyStudio.MfdSave.SavedToCraft">Saved to the running program and the craft {0}, with a backup.</s>
+   <s id="VizzyStudio.MfdSave.NoFile">Saved for this flight only: the designer's working copy doesn't hold this craft's program.</s>
+   <s id="VizzyStudio.MfdSave.WriteFailed">Saved for this flight, but writing the designer's working copy failed: see Player.log.</s>
    <s id="VizzyStudio.MfdSave.SavedToWorkingCopy">Saved to the running program and the designer's working copy, with a backup.</s>
-   <s id="VizzyStudio.MfdSave.DesignLacksProgram">The saved design {0} doesn't have this program, so it wasn't changed: save the craft in the designer to keep this.</s>
-   <s id="VizzyStudio.MfdSave.NoDesign">This craft has no saved design: save it in the designer to keep this.</s>
    <!-- MfdPanel -->
    <s id="VizzyStudio.Mfd.NoMfd">This part has no MFD.</s>
    <s id="VizzyStudio.Mfd.Widgets">Widgets</s>
@@ -195,7 +189,7 @@
    <s id="VizzyStudio.Settings.Key.Description">With the modifier below, opens the Vizzy editor in flight. Pressed again, it applies the edit.</s>
    <s id="VizzyStudio.Settings.Modifier.Description">Held with the editor key.</s>
    <s id="VizzyStudio.Settings.ShowFlightButtons.Description">Shows a Vizzy button on the flight nav panel, with Restart Vizzy and Edit Vizzy. Applies from the next flight.</s>
-   <s id="VizzyStudio.Settings.ArrangeMfd.Description">Adds Arrange MFD to the flight buttons: move, resize and rotate the widgets of a custom MFD program, then save the values into the program. Saving also changes the craft's files, after backing them up. Applies from the next flight.</s>
+   <s id="VizzyStudio.Settings.ArrangeMfd.Description">Adds Arrange MFD to the flight buttons: move, resize and rotate the widgets of a custom MFD program, then save the values into the program and the designer's working copy. Applies from the next flight.</s>
    <s id="VizzyStudio.Settings.EditorCulling.Description">Greatly increases the Vizzy editor's frame rate in large programs by pausing blocks far off screen. Off when another mod changes the editor.</s>
    <s id="VizzyStudio.Settings.FunkSyntaxHighlight.Description">Colors Funk fields and marks errors in red, in the designer and in flight.</s>
    <s id="VizzyStudio.Settings.FunkAutoFill.Description">Suggests Funk names while typing in a Funk field, in the designer and in flight. Up and Down choose, Enter takes it, Esc closes the list.</s>

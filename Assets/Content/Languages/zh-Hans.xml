@@ -84,15 +84,9 @@
    <!-- Mfd -->
    <s id="VizzyStudio.Mfd.RestartQuestion">从头重启 {0} 的 MFD 程序?其控件将被移除,线程和变量将被重置.其他程序继续运行.</s>
    <!-- MfdSave -->
-   <s id="VizzyStudio.MfdSave.FileDiffers">仅为本次飞行保存:载具文件 {0} 中的程序不同,例如在设计器或编辑 Vizzy 中修改过.没有更改任何文件.</s>
-   <s id="VizzyStudio.MfdSave.NoFile">仅为本次飞行保存:未找到包含此程序的载具文件.</s>
-   <s id="VizzyStudio.MfdSave.WriteFailed">已为本次飞行保存,但写入载具文件失败:请查看 Player.log.</s>
-   <s id="VizzyStudio.MfdSave.MayHoldChange">以下文件可能已包含该更改,旁边有 .bak-{0} 副本:{1}.</s>
-   <s id="VizzyStudio.MfdSave.NoFileChanged">没有更改任何文件.</s>
-   <s id="VizzyStudio.MfdSave.SavedToCraft">已保存到运行中的程序和载具 {0},并已备份.</s>
+   <s id="VizzyStudio.MfdSave.NoFile">仅为本次飞行保存:设计器的工作副本中没有此载具的程序.</s>
+   <s id="VizzyStudio.MfdSave.WriteFailed">已为本次飞行保存,但写入设计器的工作副本失败:请查看 Player.log.</s>
    <s id="VizzyStudio.MfdSave.SavedToWorkingCopy">已保存到运行中的程序和设计器的工作副本,并已备份.</s>
-   <s id="VizzyStudio.MfdSave.DesignLacksProgram">已保存的设计 {0} 中没有此程序,因此未被更改:请在设计器中保存载具以保留此更改.</s>
-   <s id="VizzyStudio.MfdSave.NoDesign">此载具没有已保存的设计:请在设计器中保存它以保留此更改.</s>
    <!-- MfdPanel -->
    <s id="VizzyStudio.Mfd.NoMfd">此部件没有 MFD.</s>
    <s id="VizzyStudio.Mfd.Widgets">控件</s>
@@ -195,7 +189,7 @@
    <s id="VizzyStudio.Settings.Key.Description">与下方的修饰键一起按下,在飞行中打开 Vizzy 编辑器.再次按下则应用编辑.</s>
    <s id="VizzyStudio.Settings.Modifier.Description">与编辑器按键一起按住.</s>
    <s id="VizzyStudio.Settings.ShowFlightButtons.Description">在飞行导航面板上显示一个 Vizzy 按钮,包含重启 Vizzy 和编辑 Vizzy. 从下次飞行起生效.</s>
-   <s id="VizzyStudio.Settings.ArrangeMfd.Description">在飞行按钮中添加排列 MFD: 移动,调整大小和旋转自定义 MFD 程序的控件,然后将数值保存到程序中.保存时也会更改载具文件,并先进行备份.从下次飞行起生效.</s>
+   <s id="VizzyStudio.Settings.ArrangeMfd.Description">在飞行按钮中添加排列 MFD: 移动,调整大小和旋转自定义 MFD 程序的控件,然后将数值保存到程序和设计器的工作副本中.从下次飞行起生效.</s>
    <s id="VizzyStudio.Settings.EditorCulling.Description">暂停远离屏幕的块,大幅提高大型程序中 Vizzy 编辑器的帧率.其他模组修改编辑器时自动关闭.</s>
    <s id="VizzyStudio.Settings.FunkSyntaxHighlight.Description">为 Funk 字段着色,并用红色标出错误,在设计器和飞行中都有效.</s>
    <s id="VizzyStudio.Settings.FunkAutoFill.Description">在 Funk 字段中输入时提示 Funk 名称,在设计器和飞行中都有效.上下键选择,Enter 确认,Esc 关闭列表.</s>
